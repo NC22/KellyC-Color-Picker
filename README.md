@@ -22,4 +22,6 @@ Example :
         });
     </script>
     
-See https://github.com/NC22/HTML5-Color-Picker/wiki/ for full documentation
+See [Wiki](https://github.com/NC22/HTML5-Color-Picker/wiki/) for full documentation
+
+[demo](http://catface.ru/colorpicker/examples/1.html), [demo 2](http://catface.ru/colorpicker/examples/2.html), [demo 3](http://catface.ru/colorpicker/examples/3.html)
