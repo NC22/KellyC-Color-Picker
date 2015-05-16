@@ -6,7 +6,7 @@ A scaleable color picker (color wheel). Attaches to "input" DOM element
 - Scalable
 - HSV color model
 - Tested on mobile devices
-- Don't require any addition librearies
+- Don't require any addition libraries
 - Correct turn off if browser not support HTML5
 - Two styles for set saturation and volume (display as hsv quad block or as hsv triangle)
 
