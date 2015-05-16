@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>        
+        <title>{site-title}</title>
+        <meta charset="UTF-8">
+        <script src="../html5kellycolorpicker.js"></script>
+        <style>
+            body {background : #2a3e66;}
+            #test-pickers {padding-top: 12px;text-align : center;}
+            #test-pickers  div{display : inline-block;}
+            #test-pickers  input{width : 150px;}
+            #test-pickers  button{width : 150px;}
+            #test-gradient {margin: 0 auto;margin-top: 24px;width: 150px;height : 150px;border: 2px solid rgba(176, 53, 165, 0.8);}
+        </style>
+    </head>
+    <body> 
+        <div id="test-pickers">
+            <div id="test-color-picker-quad"></div>
+            <div id="test-gradient"></div>
+            <div id="test-color-picker-triangle"></div>
+            <p>
+                <input id="test" type="text" value="none"/>
+                <button id="test-resize">increase size</button>
+                <input id="test2" type="text" value="none"/>
+            </p>                
+        </div>
+        <script> 
+            var colorPickerQ = new KellyColorPicker({
+                place : 'test-color-picker-quad', 
+                size : 150, 
+                input : 'test', 
+                method : 'quad', 
+                color : '#ab56a3'
+            });
+            
+            var colorPickerT = new KellyColorPicker({
+                place : 'test-color-picker-triangle', 
+                input : 'test2',  
+                size : 150, 
+                method : 'triangle'
+            });
+                  
+            var onchange = function(self) { 
+                var css = 'linear-gradient(-45deg, '+ colorPickerT.getCurColorHex() +', ' + colorPickerQ.getCurColorHex() + ')'
+                document.getElementById('test-gradient').style.background = css;
+            };
+                
+            colorPickerT.addUserEvent("change", onchange);
+            colorPickerQ.addUserEvent("change", onchange);
+            colorPickerT.setColorByHex('#3b8db1'); // call on change event to update test-gradient
+
+            // increase size button click
+
+            document.getElementById('test-resize').onclick = function(e) {                 
+                // addition changes
+                
+                colorPickerQ.getWheel().width += 6;
+                colorPickerT.getWheel().width += 6;
+                colorPickerQ.getSvFigCursor().radius += 2; 
+                colorPickerT.getSvFigCursor().radius += 2;
+                colorPickerQ.getWheelCursor().height += 2; 
+                colorPickerT.getWheelCursor().height += 2;
+                
+                // canvase resize
+                
+                colorPickerQ.resize(colorPickerQ.getCanvas().width + 100);
+                colorPickerT.resize(colorPickerT.getCanvas().width + 100);
+                
+                // resize test-gradien block
+                
+                document.getElementById('test-gradient').style.width = colorPickerQ.getCanvas().width + 'px';
+                document.getElementById('test-gradient').style.height = colorPickerQ.getCanvas().width + 'px';                 
+            };            
+        </script>
+    </body>
+</html>
