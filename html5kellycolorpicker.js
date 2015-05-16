@@ -1053,7 +1053,7 @@ function KellyColorPicker(cfg) {
         }
     };
     
-    // перемещение указателя по canvas в режиме покоя - warn - пока запущено всегда, не только при перемещении по канвасу
+    // перемещение указателя по canvas в режиме покоя
     this.mouseMoveRest = function(e) {
         if (drag) return;        
         
@@ -1073,6 +1073,9 @@ function KellyColorPicker(cfg) {
     };
     
     // to prevent scroll by touches while change color
+    // в FireFox под андройд есть "фича" которая скрывает или раскрывает тулбар адресной строки при движении пальцем
+    // отключить её можно только через опцию about:config browser.chrome.dynamictoolbar
+    
     this.touchMoveEvent = function(e) {
         if (drag) { // todo check number of touches to ignore zoom action
             event.preventDefault();
