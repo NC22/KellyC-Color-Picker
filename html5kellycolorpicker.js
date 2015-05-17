@@ -700,7 +700,7 @@ function KellyColorPicker(cfg) {
             {x : wheel.outerRadius + wheelCursor.paddingX, y : wheelCursor.height * -1},
             {x : wheel.outerRadius + wheelCursor.paddingX, y : wheelCursor.height}, 
             {x : wheel.innerRadius - wheelCursor.paddingX, y : wheelCursor.height},
-            {x : wheel.innerRadius - wheelCursor.paddingX, y : wheelCursor.height * -1},
+            {x : wheel.innerRadius - wheelCursor.paddingX, y : wheelCursor.height * -1}
         ];
         
         for (var i=0; i <= wheelCursor.path.length-1; ++i) {
