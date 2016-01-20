@@ -4,7 +4,7 @@
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
  * @copyright 2015 Rubchuk Vladimir
  * @license   GPLv3
- * @version   0.8
+ * @version   0.9b
  *   
  * Usage example :
  * 
@@ -40,6 +40,7 @@ function KellyColorPicker(cfg) {
     var ctx = false;
     
     var method = 'quad';
+    var alpha = false; // посмотреть где лучше определять доп пространство в canvaseSize или в canvas.width
     var drag = false;
     var cursorAnimReady = true; // fix FPS by requestAnimationFrame 
     
@@ -49,7 +50,7 @@ function KellyColorPicker(cfg) {
     var canvasHelper = document.createElement("canvas");
     var canvasHelperCtx = false; // используется если нужно перекопировать изображение через drawImage для сохранения прозрачности
     var rendered = false;
-    var canvasHelperData = null; // rendered interface without cursors
+    var canvasHelperData = null; // rendered interface without cursors and without alpha slider [wheelBlockSize x wheelBlockSize]
     
     var input = false;
     var inputColor = true;
@@ -61,13 +62,14 @@ function KellyColorPicker(cfg) {
     var basePadding = 2;
     
     var padding;
-    var canvasSize = 200;
+    var wheelBlockSize = 200;
     var center;
     
     // current color
     var hsv;
     var rgb;
     var hex = '#000000';
+    var a = 1;
     
     var wheel = new Object;
         wheel.width = 18;
@@ -78,6 +80,56 @@ function KellyColorPicker(cfg) {
         wheel.outerStrokeStyle = 'rgba(0,0,0,0.2)';
         wheel.innerStrokeStyle = 'rgba(0,0,0,0.2)';
         wheel.pos; // center point; wheel cursor \ hsv quad \ hsv triangle positioned relative that point
+        wheel.draw = function() {
+                
+            if (this.imageData) {
+                ctx.putImageData(this.imageData, 0, 0);
+            } else {
+                var hAngle = this.startAngle;
+                for(var angle=0; angle<=360; angle++) {
+                                   
+                    var startAngle = toRadians(angle-2);
+                    var endAngle = toRadians(angle);            
+
+                    ctx.beginPath();
+                    ctx.moveTo(center, center);
+                    ctx.arc(center, center, this.outerRadius, startAngle, endAngle, false);
+                    ctx.closePath();
+
+                    var targetRgb = hsvToRgb(hAngle / 360, 1, 1);
+                    ctx.fillStyle = 'rgb('+targetRgb.r+', '+targetRgb.g+', '+targetRgb.b+')';
+                    //ctx.fillStyle = 'hsl('+hAngle+', 100%, 50%)';
+                    ctx.fill();
+                    
+                    hAngle ++;
+                    if (hAngle >= 360) hAngle = 0;
+                }
+
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath();
+                ctx.arc(center, center, this.innerRadius, 0, PI*2);
+
+                ctx.fill();
+
+                ctx.globalCompositeOperation = "source-over";
+                ctx.strokeStyle = this.innerStrokeStyle; // 'rgba(0,0,0,0.2)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.closePath();
+
+                // wheel border
+                ctx.beginPath();   
+                ctx.arc(center, center, this.outerRadius, 0, PI*2);
+                ctx.strokeStyle = this.outerStrokeStyle;
+                ctx.lineWidth = 2;
+                ctx.stroke();        
+                ctx.closePath();          
+
+                this.imageData = ctx.getImageData(0, 0, wheelBlockSize, wheelBlockSize);
+            }
+        
+        };
+        
         wheel.isDotIn = function(dot) {
             if (Math.pow(wheel.pos.x - dot.x, 2) + Math.pow(wheel.pos.y - dot.y, 2) < Math.pow(wheel.outerRadius, 2)) {
                 if (Math.pow(wheel.pos.x - dot.x, 2) + Math.pow(wheel.pos.y - dot.y, 2) > Math.pow(wheel.innerRadius, 2)) {
@@ -92,6 +144,72 @@ function KellyColorPicker(cfg) {
         wheelCursor.height = 4;
         wheelCursor.paddingX = 2; // padding from sides of wheel
         wheelCursor.path; // rotatePath2 --- поворот по старой функции, в фигуре не приплюсован центр
+        
+    var alphaSlider = new Object;
+        alphaSlider.width = 18;
+        alphaSlider.padding = 4;
+        alphaSlider.outerStrokeStyle = 'rgba(0,0,0,0.2)';
+        alphaSlider.innerStrokeStyle = 'rgba(0,0,0,0.2)';
+        alphaSlider.height;
+        alphaSlider.pos; // left top corner position
+        alphaSlider.updateSize = function() {
+            this.pos = {x : wheelBlockSize + alphaSlider.padding, y : alphaSlider.padding}; 
+            this.height = wheelBlockSize - alphaSlider.padding * 2;
+        };
+        
+        alphaSlider.draw = function() {
+            var alphaGrd = ctx.createLinearGradient(0,0,0, this.height);
+                alphaGrd.addColorStop(0,'rgba('+ rgb.r +','+ rgb.g + ','+ rgb.b + ',1)');
+                alphaGrd.addColorStop(1,'rgba('+ rgb.r +','+ rgb.g + ','+ rgb.b + ',0)');
+                      
+            ctx.beginPath();
+            ctx.rect(this.pos.x, this.pos.y, this.width , this.height);
+            ctx.fillStyle = "white";
+            ctx.fill();
+            ctx.fillStyle = alphaGrd;   
+            ctx.fill();
+              
+            ctx.strokeStyle='rgba(0,0,0, 0.2)';
+            ctx.lineWidth = 2;
+            
+            ctx.stroke();    
+            ctx.closePath(); 
+        };
+        
+        alphaSlider.dotToAlpha = function(dot) {
+            return 1 - Math.abs(this.pos.y - dot.y) / this.height;                      
+        };
+        
+        alphaSlider.alphaToDot = function(alpha){
+            return {    
+                x : 0,
+                y : this.height - (this.height * alpha)
+            };
+        };
+        
+        alphaSlider.limitDotPosition = function(dot) {
+            var y = dot.y;
+            
+            if (y < this.pos.y) {
+                y = this.pos.y;
+            }
+            
+            if (y > this.pos.y + this.height) {
+                y = this.pos.y + this.height;
+            }
+            
+            return {x : this.pos.x, y : y};
+        }; 
+        
+        alphaSlider.isDotIn = function(dot) {
+            if (dot.x < this.pos.x || 
+                dot.x > this.pos.x + alphaSlider.width || 
+                dot.y < this.pos.y || 
+                dot.y > this.pos.y + this.height) {
+                return false;
+            }            
+            return true;
+        };   
 
     // svCursorMouse - для устройств с мышкой, генератор указателя в зависимости от активной области
     var svCursorMouse = new Object;
@@ -182,7 +300,7 @@ function KellyColorPicker(cfg) {
             var quadY = this.path[0].y;
             
             var svError = 0.02;
-            if (canvasSize < 100) svError = 0.07;
+            if (wheelBlockSize < 100) svError = 0.07;
             
             for (var y=0; y < this.size; y++) { 
                 for (var x=0; x < this.size; x++) {
@@ -262,10 +380,12 @@ function KellyColorPicker(cfg) {
         quad.updateSize = function() {        
             var workD = (wheel.innerRadius * 2) - wheelCursor.paddingX*2 - this.padding*2;
             
-            // исходя из формулы диагонали квадрата
+            // исходя из формулы диагонали квадрата, узнаем длинну стороны на основании доступного диаметра
             this.size = Math.floor(workD / Math.sqrt(2));
 
             this.path = new Array();
+            
+            // находим верхнюю левую точку и от нее задаем остальные координаты
             this.path[0] = {x : -1 * (this.size / 2), y : -1 * (this.size / 2)};
             this.path[1] = {x : this.path[0].x + this.size, y :  this.path[0].y};
             this.path[2] = {x : this.path[1].x, y :  this.path[1].y + this.size};
@@ -329,7 +449,7 @@ function KellyColorPicker(cfg) {
         
         triangle.svToDot = function(sv) {
             var svError = 0.02;
-            if (canvasSize < 100) svError = 0.07;
+            if (wheelBlockSize < 100) svError = 0.07;
             
             for (var y=0; y < this.size; y++) {
                 for (var x=0; x < this.size; x++) { 
@@ -440,7 +560,7 @@ function KellyColorPicker(cfg) {
         };
         
         triangle.updateSize = function() {            
-            // и формулы высоты равностороннего треугольника            
+            // из формулы высоты равностороннего треугольника            
             this.outerRadius = wheel.innerRadius - wheelCursor.paddingX - this.padding;            
             // из теоремы синусов треугольника
             this.size = Math.floor((2 * this.outerRadius) * Math.sin(toRadians(60))); 
@@ -688,7 +808,7 @@ function KellyColorPicker(cfg) {
         rendered = false;
         wheel.imageData = null;
         
-        center = canvasSize / 2;
+        center = wheelBlockSize / 2;
         wheel.pos = {x : center, y : center};
         
         wheel.outerRadius = center - padding;
@@ -703,20 +823,24 @@ function KellyColorPicker(cfg) {
             {x : wheel.innerRadius - wheelCursor.paddingX, y : wheelCursor.height * -1}
         ];
         
-        for (var i=0; i <= wheelCursor.path.length-1; ++i) {
-            //wheelCursor.path[i].x += wheel.pos.x; 
-            //wheelCursor.path[i].y += wheel.pos.y;
-        }
+        //for (var i=0; i <= wheelCursor.path.length-1; ++i) {
+        //  wheelCursor.path[i].x += wheel.pos.x; 
+        //  wheelCursor.path[i].y += wheel.pos.y;
+        //}
+        
+        var width = wheelBlockSize;
+        if (alpha) width += alphaSlider.width + alphaSlider.padding * 2; 
         
         if (place.tagName != 'CANVAS') {
-            place.style.width = canvasSize + 'px';
-            place.style.height = canvasSize + 'px';
+            place.style.width = width + 'px';
+            place.style.height = wheelBlockSize + 'px';
         }
         
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
+        canvas.width = width;
+        canvas.height = wheelBlockSize;
 
         svFig.updateSize();
+        if (alpha) alphaSlider.updateSize();
     }
     
     function updateInput(){
@@ -731,7 +855,7 @@ function KellyColorPicker(cfg) {
                 input.style.color = "#000";
             }
 
-            input.style.background = hex; 
+            input.style.background = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + a + ')'; 
         }
     }
     
@@ -766,6 +890,14 @@ function KellyColorPicker(cfg) {
             // if (!cfg.input) log += '| "input" (' + inputName + ') not not found';  
         } 
         
+        if (cfg.alpha !== undefined) {
+            a = cfg.alpha;
+        }
+        
+        if (cfg.alpha_slider !== undefined) {
+            alpha = cfg.alpha_slider;
+        }
+        
         if (cfg.input_color !== undefined) {
             inputColor = cfg.input_color;
         }        
@@ -797,7 +929,7 @@ function KellyColorPicker(cfg) {
         else criticalError += '| "place" (' + placeName + ') not not found';
         
         if (cfg.size && cfg.size > 0) {
-            canvasSize = cfg.size;            
+            wheelBlockSize = cfg.size;            
         }
         
         if (cfg.color) hex = cfg.color;
@@ -864,70 +996,28 @@ function KellyColorPicker(cfg) {
     
     function drawColorPicker() {
         if (!ctx) return false;
-             
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
         if (rendered) {        
             ctx.putImageData(canvasHelperData, 0, 0);
+            
+            if (alpha) alphaSlider.draw();            
             return true;
-        }
+        }   
         
-        ctx.clearRect(0, 0, canvasSize, canvasSize);
-        
-        // форма кольца может измениться только при изменении размеров виджета        
-        
-        if (wheel.imageData) {
-            ctx.putImageData(wheel.imageData, 0, 0);
-        } else {
-            var hAngle = wheel.startAngle;
-            for(var angle=0; angle<=360; angle++) {
-                               
-                var startAngle = toRadians(angle-2);
-                var endAngle = toRadians(angle);            
-
-                ctx.beginPath();
-                ctx.moveTo(center, center);
-                ctx.arc(center, center, wheel.outerRadius, startAngle, endAngle, false);
-                ctx.closePath();
-
-                var targetRgb = hsvToRgb(hAngle / 360, 1, 1);
-                ctx.fillStyle = 'rgb('+targetRgb.r+', '+targetRgb.g+', '+targetRgb.b+')';
-                //ctx.fillStyle = 'hsl('+hAngle+', 100%, 50%)';
-                ctx.fill();
-                
-                hAngle ++;
-                if (hAngle >= 360) hAngle = 0;
-            }
-
-            ctx.globalCompositeOperation = "destination-out";
-            ctx.beginPath();
-            ctx.arc(center, center, wheel.innerRadius, 0, PI*2);
-
-            ctx.fill();
-
-            ctx.globalCompositeOperation = "source-over";
-            ctx.strokeStyle=wheel.innerStrokeStyle; // 'rgba(0,0,0,0.2)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.closePath();
-
-            // wheel border
-            ctx.beginPath();   
-            ctx.arc(center, center, wheel.outerRadius, 0, PI*2);
-            ctx.strokeStyle=wheel.outerStrokeStyle;
-            ctx.lineWidth = 2;
-            ctx.stroke();        
-            ctx.closePath();          
-
-            wheel.imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        }
- 
+        // форма кольца может измениться только при изменении размеров виджета      
+        wheel.draw(); 
         svFig.draw();   
+        
+        if (alpha) alphaSlider.draw();
         
         // поместить текущее отрисованное изображение в буфер
         // notice :
         // при перемещении курсора кольца сохранять буфер все изображение бессмысленно - sv блок постоянно обновляется, поэтому
         // сохраняем уже на событии выхода из процесса перемещения
         if (!drag) {
-            canvasHelperData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            canvasHelperData = ctx.getImageData(0, 0, wheelBlockSize, wheelBlockSize);
             rendered = true;
         }
         return true;     
@@ -937,7 +1027,21 @@ function KellyColorPicker(cfg) {
         if (!drawColorPicker()) { return false; }
         
         var curAngle = hsv.h * 360 - wheel.startAngle;
+        
         // cursors
+        
+        if (alpha) {
+            ctx.beginPath();
+            var cursorHeight = 2;
+            var cursorPaddingX = 2;
+            var pointY = alphaSlider.height * (1 - a);
+            ctx.rect(alphaSlider.pos.x - cursorPaddingX, alphaSlider.padding + pointY - cursorHeight / 2, alphaSlider.width + cursorPaddingX * 2, cursorHeight);
+            ctx.strokeStyle='rgba(0,0,0, 0.8)';
+            ctx.lineWidth = 2;
+            
+            ctx.stroke();
+            ctx.closePath(); 
+        }
         
         ctx.beginPath();
         
@@ -993,6 +1097,8 @@ function KellyColorPicker(cfg) {
         draw();
     };
     
+    // update color with redraw canvas and update input hex value 
+    
     this.setColorByHex = function(inputHex) {
         if (!inputHex || !inputHex.length) return;
         
@@ -1021,7 +1127,25 @@ function KellyColorPicker(cfg) {
         
         updateInput();
     };
+    
+    this.setAlphaByDot = function(dot) {
+        a = alphaSlider.dotToAlpha(dot);
+       
+        if (userEvents["change"]) {
+            var callback = userEvents["change"]; 
+                callback(handler);
+        }
         
+        updateInput();        
+        draw();
+    };
+    
+    this.setAlpha = function(alpha) {
+        a = alpha;
+        updateInput();        
+        draw();
+    };
+    
     this.setColorByDot = function(dot) {
         var sv = svFig.dotToSv(dot);
         
@@ -1103,6 +1227,12 @@ function KellyColorPicker(cfg) {
         
             move =  function(e) {handler.SvMouseMove(e, newDot);};
             up =  function(e) {KellyColorPicker.cursorLock = false; handler.SvMouseUp(e, newDot); };
+        } else if (alpha && alphaSlider.isDotIn(newDot)) {
+            drag = 'alpha';            
+            handler.setAlphaByDot(newDot);
+        
+            move =  function(e) {handler.AlphaMouseMove(e, newDot);};
+            up =  function(e) {KellyColorPicker.cursorLock = false; handler.AlphaMouseUp(e, newDot); };            
         }
         
         if (move && up) { 
@@ -1162,6 +1292,53 @@ function KellyColorPicker(cfg) {
                 callback(event, handler, newDot);
         }
     };
+
+    this.AlphaMouseMove = function(event, dot) {
+        event.preventDefault();       
+        if (!drag) return;
+        
+        if (!cursorAnimReady) {
+            return;
+        }
+        
+        cursorAnimReady = false;
+        var newDot = getEventDot(event);
+        
+        // console.log('SvMouseMove : start : ' + dot.x + ' | ' + dot.y + ' cur : ' + newDot.x + ' | ' + newDot.y);
+        
+        newDot = alphaSlider.limitDotPosition(newDot);
+ 
+        requestAnimationFrame(function() {cursorAnimReady = true;});
+        //setTimeout(function() {cursorAnimReady = true;}, 1000/30);
+        
+        handler.setAlphaByDot(newDot);
+        
+        if (userEvents["mousemovealpha"]) {
+            var callback = userEvents["mousemovealpha"]; 
+                callback(event, handler, newDot);
+        }
+    };
+        
+    this.AlphaMouseUp = function(event, dot) {
+        event.preventDefault();   
+        if (!drag) return;
+
+        removeEventListener(document, "mouseup"); 
+        removeEventListener(document, "mousemove"); 
+        removeEventListener(document, "touchend"); 
+        removeEventListener(document, "touchmove");
+        
+        enableEvents();
+        drag = false;
+        
+        var newDot = getEventDot(event);
+        svCursorMouse.updateCursor(newDot); 
+        
+        if (userEvents["mouseupalpha"]) {
+            var callback = userEvents["mouseupalpha"]; 
+                callback(event, handler, newDot);
+        }
+    };     
     
     this.SvMouseMove = function(event, dot) {
         event.preventDefault();       
@@ -1243,6 +1420,8 @@ function KellyColorPicker(cfg) {
     this.getCurColorHsv = function() { return hsv; };
     this.getCurColorRgb = function() { return rgb; };
     this.getCurColorHex = function() { return hex; };
+    this.getCurColorRgba = function() { return {r : rgb.r, g : rgb.g, b : rgb.b, a : a}; };
+    this.getCurAlpha = function() { return a; };
     
     this.updateView = function(dropBuffer) { 
         if (!ctx) return false;
@@ -1261,14 +1440,15 @@ function KellyColorPicker(cfg) {
     
     this.resize = function(size) {
         if (!ctx) return false;
-        if (size == canvasSize) return true;
+        if (size == wheelBlockSize) return true;
         rendered = false;
         wheel.imageData = null;
         svFig.imageData = null;
         canvasHelperData = null;
-        canvasSize = size;
+        wheelBlockSize = size;
         updateSize();
-        handler.setColorByHex(hex);
+        
+        handler.setColorByHex(hex);       
         return false;
     };
 

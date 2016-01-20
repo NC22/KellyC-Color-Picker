@@ -30,18 +30,22 @@
                 size : 150, 
                 input : 'test', 
                 method : 'quad', 
-                color : '#ab56a3'
+                color : '#ab56a3',
+				alpha_slider : true, 
             });
             
             var colorPickerT = new KellyColorPicker({
                 place : 'test-color-picker-triangle', 
                 input : 'test2',  
                 size : 150, 
-                method : 'triangle'
+                method : 'triangle',
+				alpha_slider : true, 
             });
                   
             var onchange = function(self) { 
-                var css = 'linear-gradient(-45deg, '+ colorPickerT.getCurColorHex() +', ' + colorPickerQ.getCurColorHex() + ')'
+				var rgbaT = colorPickerT.getCurColorRgba();
+				var rgbaQ = colorPickerQ.getCurColorRgba();
+                var css = 'linear-gradient(-45deg, rgba(' + rgbaT.r + ', ' + rgbaT.g + ', ' + rgbaT.b + ', ' + rgbaT.a + '), rgba(' + rgbaQ.r + ', ' + rgbaQ.g + ', ' + rgbaQ.b + ', ' + rgbaQ.a + '))'
                 document.getElementById('test-gradient').style.background = css;
             };
                 

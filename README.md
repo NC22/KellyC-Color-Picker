@@ -1,4 +1,4 @@
-# HTML5-Color-Picker v0.8
+# HTML5-Color-Picker v0.9b 
 
 A scaleable color picker (color wheel). Attaches to "input" DOM element
 
@@ -9,6 +9,7 @@ A scaleable color picker (color wheel). Attaches to "input" DOM element
 - Don't require any addition libraries
 - Correct turn off if browser not support HTML5
 - Two styles for set saturation and volume (display as hsv quad block or as hsv triangle)
+- Optional transparency slider (> v0.8)
 
 Example : 
     

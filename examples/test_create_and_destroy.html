@@ -35,12 +35,16 @@
                 var color = "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
                 var method = 'triangle';
                 if (rand(0,1000) > 500) method = 'quad';
-                
+                var alphaSlider = false;
+				if (rand(0,1000) > 500) alphaSlider = true;
+				var alpha = rand(0,100) / 100;
                 var colorPicker = new KellyColorPicker({
                     place : place, 
                     size : size, 
                     method : method, 
-                    color : color
+                    color : color,
+					alpha_slider : alphaSlider,
+					alpha : alpha,
                 });
                     
                 // set size options to ColorPicker
