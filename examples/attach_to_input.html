@@ -9,12 +9,8 @@
     <body>         
         <canvas id="picker"></canvas><br>
         <input id="color">
-        <input id="alpha">
         <script>
-            new KellyColorPicker({place : 'picker', input : 'color', size : 150, alpha_slider : true, userEvents : { change : function(self) {
-            var alpha = document.getElementById('alpha');
-            alpha.value = self.getCurAlpha(); 
-        }}});            
+            new KellyColorPicker({place : 'picker', input : 'color', size : 150});            
         </script> 
     </body> 
 </html>  
