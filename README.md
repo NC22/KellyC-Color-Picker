@@ -1,4 +1,4 @@
-# HTML5-Color-Picker v0.9b 
+# HTML5-Color-Picker v0.91
 
 A scaleable color picker (color wheel). Attaches to "input" DOM element
 
