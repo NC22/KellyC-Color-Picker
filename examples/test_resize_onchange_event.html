@@ -5,7 +5,8 @@
         <meta charset="UTF-8">
         <script src="../html5kellycolorpicker.min.js"></script>
         <style>
-            body {background : #2a3e66;}
+            body {background : #2a3e66; font-family: Calibri;} 
+			input{border: 0px;}
             #test-pickers {padding-top: 12px;text-align : center;}
             #test-pickers  div{display : inline-block;}
             #test-pickers  input{width : 150px;}
@@ -68,13 +69,13 @@
 
                 // canvase resize
 
-                colorPickerQ.resize(colorPickerQ.getCanvas().width + 100);
-                colorPickerT.resize(colorPickerT.getCanvas().width + 100);
+                colorPickerQ.resize(colorPickerQ.getCanvas().height + 100);
+                colorPickerT.resize(colorPickerT.getCanvas().height + 100);
 
                 // resize test-gradien block
 
-                document.getElementById('test-gradient').style.width = colorPickerQ.getCanvas().width + 'px';
-                document.getElementById('test-gradient').style.height = colorPickerQ.getCanvas().width + 'px';
+                document.getElementById('test-gradient').style.width = colorPickerQ.getCanvas().height + 'px';
+                document.getElementById('test-gradient').style.height = colorPickerQ.getCanvas().height + 'px';
             };
         </script>
     </body>

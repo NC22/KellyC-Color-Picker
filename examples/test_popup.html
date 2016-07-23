@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{site-title}</title>
+        <meta charset="UTF-8">
+        <script src="../html5kellycolorpicker.min.js"></script>
+        <style>body {background : #d4d4d4; font-family: Calibri; padding-top: 348px; text-align: center;} input {border: 0px;}</style>
+    </head>
+    <body>
+		<p><b>Press on any input</b></p>
+		<!--<a href="#" onclick="colorpickers[0].resize(colorpickers[0].getCanvas().width + 20); return false;">Resize left</a>-->
+        <input class="colorpicker" id="color" value="rgb(139, 121, 179, 0.54)">
+		<input class="colorpicker" id="color2" value="#e45dad">
+		<input class="colorpicker" id="color2" value="#fff">
+        <script>
+			// attaches by class
+			var colorpickers = KellyColorPicker.attachToInputByClass('colorpicker', {alpha_slider : true, size : 200});
+			// 
+			// same, but attaches by ids
+            // new KellyColorPicker({input : 'color', alpha_slider : true, size : 150});
+			// new KellyColorPicker({input : 'color2', size : 150});
+        </script>
+    </body>
+</html>

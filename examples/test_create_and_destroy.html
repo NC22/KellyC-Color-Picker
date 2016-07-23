@@ -55,7 +55,8 @@
                 colorPicker.getWheel().width += rand(0,6);
                 colorPicker.getSvFigCursor().radius += rand(0,4);
                 colorPicker.getWheelCursor().height += rand(0,4);
-
+				var alpha = colorPicker.getAlphaFig();
+				if (alpha) alpha.width += rand(0,11);
                 colorPicker.getWheelCursor().lineWeight += rand(0, 1);
                 colorPicker.getWheel().startAngle += rand(0,11) * 30;
                 colorPicker.getWheel().outerStrokeStyle = 'rgba(' +r +',' +g +',' +b +', 0.6)';
