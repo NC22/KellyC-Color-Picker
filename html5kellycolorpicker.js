@@ -4,7 +4,7 @@
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
  * @copyright 2015-2016 Rubchuk Vladimir
  * @license   GPLv3
- * @version   1.02
+ * @version   1.03
  *
  * Usage example :
  *
@@ -30,7 +30,7 @@ function KellyColorPicker(cfg) {
     var ctx = false;
 
     var method = 'quad';
-    var alpha = false; // is alpha slider enabled
+    var alpha = false;          // is alpha slider enabled
     var drag = false;
     var cursorAnimReady = true; // sets by requestAnimationFrame to limit FPS on events like mousemove etc. when draging 
 
@@ -39,18 +39,18 @@ function KellyColorPicker(cfg) {
 
     var canvasHelper = document.createElement("canvas");
     var canvasHelperCtx = false; // used if needed to copy image data throw ctx.drawImage for save alpha channel
-    var rendered = false; // is colorpicecker rendered (without side alpha bar and cursors, rendered image stores in canvasHelperData
+    var rendered = false;        // is colorpicecker rendered (without side alpha bar and cursors, rendered image stores in canvasHelperData
     var canvasHelperData = null; // rendered interface without cursors and without alpha slider [wheelBlockSize x wheelBlockSize]
 
     var input = false;
 
     // used by updateInput() function if not overloaded by user event
-    var inputColor = true; // update input color according to picker
-    var inputFormat = 'mixed'; // mixed | hex | rgba	
+    var inputColor = true;     // update input color according to picker
+    var inputFormat = 'mixed'; // mixed | hex | rgba
 
-    var popup = new Object; // popup block for input
-    popup.tag = false; // Dom element if popup is enabled
-    popup.margin = 6; // margin from input in pixels
+    var popup = new Object;    // popup block for input
+    popup.tag = false;         // Dom element if popup is enabled
+    popup.margin = 6;          // margin from input in pixels
 
     // container, or canvas element
     var place = false;
@@ -423,7 +423,8 @@ function KellyColorPicker(cfg) {
         handler.setColorByHex(false); // update color info and first draw
     }
 
-    // return default color #000000 on fail
+	// Read color value from string cString in rgb \ rgba \ hex format 
+    // falseOnFail = false - return default color #000000 on fail
 
     function readColorData(cString, falseOnFail) {
         var alpha = 1;
@@ -497,8 +498,11 @@ function KellyColorPicker(cfg) {
             var quadY = this.path[0].y;
 
             var svError = 0.02;
-            if (wheelBlockSize < 100)
+            if (wheelBlockSize < 150) {
                 svError = 0.07;
+            } else if (wheelBlockSize < 100) {
+                svError = 0.16;
+            }
 
             for (var y = 0; y < this.size; y++) {
                 for (var x = 0; x < this.size; x++) {
@@ -650,8 +654,11 @@ function KellyColorPicker(cfg) {
 
         triangle.svToDot = function (sv) {
             var svError = 0.02;
-            if (wheelBlockSize < 100)
+            if (wheelBlockSize < 150) {
                 svError = 0.07;
+            } else if (wheelBlockSize < 100) {
+                svError = 0.16;
+            }
 
             for (var y = 0; y < this.size; y++) {
                 for (var x = 0; x < this.size; x++) {
@@ -860,8 +867,9 @@ function KellyColorPicker(cfg) {
     }
 
     // [converters]
-
+    // Read more about HSV color model :
     // https://ru.wikipedia.org/wiki/HSV_%28%F6%E2%E5%F2%EE%E2%E0%FF_%EC%EE%E4%E5%EB%FC%29
+    // source of converter hsv functions
     // http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
 
     function hsvToRgb(h, s, v) {
@@ -1061,14 +1069,17 @@ function KellyColorPicker(cfg) {
             alphaSlider.updateSize();
     }
 
+    // updates input after color changes (manualEnter = true if value entered from input, not from widget)
+    // if manualEnter = true - save original text in input, else set input value in configurated format
+    // if user event 'updateinput' is setted and return false - prevent default updateInput behavior
+
     function updateInput(manualEnter) {
         if (!input)
             return;
+
         if (userEvents["updateinput"]) {
             var callback = userEvents["updateinput"];
-            callback(handler, input, manualEnter);
-
-            return;
+            if (!callback(handler, input, manualEnter)) return;
         }
 
         var rgba = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + a.toFixed(2) + ')';
@@ -1281,10 +1292,17 @@ function KellyColorPicker(cfg) {
             KellyColorPicker.activePopUp = false;
     }
 
+	// if 'popupshow' user event is setted and return false - prevent show popup default behavior
+	
     this.popUpShow = function (e) {
         if (popup.tag === false)
             return;
-
+			
+        if (userEvents["popupshow"]) {
+            var callback = userEvents["popupshow"];
+            if (!callback(handler, e)) return;
+        }
+		
         // include once 
         if (!KellyColorPicker.popupEventsInclude) {
             addEventListner(document, "click", function (e) {
