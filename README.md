@@ -1,7 +1,5 @@
 # HTML5-Color-Picker v1.03
 
-[[http://catface.ru/colorpicker/1.png|alt=Kelly Color Picker]]
-
 A scaleable color picker (color wheel). Attaches to "input" DOM element
 
 - HTML5 canvas
