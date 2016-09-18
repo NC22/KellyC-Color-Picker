@@ -348,6 +348,7 @@ function KellyColorPicker(cfg) {
                 popup.tag.style.borderBottomLeftRadius = '4px';
                 popup.tag.style.borderBottomRightRadius = '4px';
                 popup.tag.style.padding = "12px";
+                popup.tag.style.boxSizing = "content-box";
 
             } else {
                 popup.tag.className = cfg.inputClassName;
