@@ -4,11 +4,15 @@
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
  * @copyright 2015-2016 Rubchuk Vladimir
  * @license   GPLv3
- * @version   1.03
+ * @version   1.15
  *
  * Usage example :
  *
  *   new KellyColorPicker({place : 'color-picker'});
+ *
+ * ToDo :
+ * 
+ * Add switch color in colorsavers button (analog of X button in Photoshop)
  *
  **/
 
@@ -21,7 +25,9 @@
 function KellyColorPicker(cfg) {
     var PI = Math.PI;
 
-    var svFig;
+    var svFig; // current method SV figure object
+
+    var changeCursor = true;
 
     var svCursor = new Object;
     svCursor.radius = 4;
@@ -39,14 +45,14 @@ function KellyColorPicker(cfg) {
 
     var canvasHelper = document.createElement("canvas");
     var canvasHelperCtx = false; // used if needed to copy image data throw ctx.drawImage for save alpha channel
-    var rendered = false;        // is colorpicecker rendered (without side alpha bar and cursors, rendered image stores in canvasHelperData
+    var rendered = false;        // is colorpicker rendered (without side alpha bar and cursors, rendered image stores in canvasHelperData
     var canvasHelperData = null; // rendered interface without cursors and without alpha slider [wheelBlockSize x wheelBlockSize]
 
     var input = false;
 
     // used by updateInput() function if not overloaded by user event
     var inputColor = true;     // update input color according to picker
-    var inputFormat = 'mixed'; // mixed | hex | rgba
+    var inputFormat = 'mixed'; // text format of colorpicker color displayed in input element | values : mixed | hex | rgba
 
     var popup = new Object;    // popup block for input
     popup.tag = false;         // Dom element if popup is enabled
@@ -68,6 +74,291 @@ function KellyColorPicker(cfg) {
     var hex = '#000000';
     var a = 1;
 
+    var resizeWith = false;
+
+    var colorSavers = new Array();
+
+    var styleSwitch = false; // change method from square to triangle
+    var svFigsPool = new Array(); // if we have button for switch method, better store already created figure object to buffer
+
+    // style switch from triange to quad and backwards
+    function initStyleSwitch() {
+
+        styleSwitch = new Object;
+        styleSwitch.size;
+        styleSwitch.sizePercentage = 10;
+        styleSwitch.position;
+        styleSwitch.paddingY = 4;
+        styleSwitch.paddingX = 4;
+        styleSwitch.imageData = new Array();
+        styleSwitch.lineWidth = 2;
+        styleSwitch.color = '#c1ebf5';
+
+        styleSwitch.updateSize = function () {
+            this.size = parseInt(wheelBlockSize - (wheelBlockSize / 100) * (100 - this.sizePercentage));
+
+            if (this.size < 16)
+                this.size = 16;
+
+            this.position = {x: this.paddingX, y: this.paddingY};
+        }
+
+        styleSwitch.draw = function () {
+
+            if (this.imageData[method]) {
+                ctx.putImageData(this.imageData[method], this.position.x, this.position.y);
+                return;
+            }
+
+            var rgb = hexToRgb(this.color);
+
+            canvasHelper.width = this.size;
+            canvasHelper.height = this.size;
+
+            canvasHelperCtx.clearRect(0, 0, this.size, this.size);
+            canvasHelperCtx.beginPath();
+
+            var switchFig = 'triangle';
+            if (method == 'triangle')
+                switchFig = 'quad';
+
+            canvasHelperCtx.beginPath();
+
+            if (this.size < 35) {
+                var circleRadiusMain = canvasHelper.width / 2;
+                var circleRadius = circleRadiusMain;
+            } else {
+
+                var circleRadiusMain = (canvasHelper.width / 2) - this.lineWidth;
+
+                canvasHelperCtx.arc(this.size / 2, this.size / 2, circleRadiusMain, 0, PI * 2);
+                canvasHelperCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+                canvasHelperCtx.lineWidth = this.lineWidth;
+                canvasHelperCtx.stroke();
+
+                var circleRadius = circleRadiusMain - 6;
+                canvasHelperCtx.closePath();
+                canvasHelperCtx.beginPath();
+                canvasHelperCtx.arc(this.size / 2, this.size / 2, circleRadius, 0, PI * 2);
+                canvasHelperCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+                canvasHelperCtx.lineWidth = this.lineWidth;
+                canvasHelperCtx.stroke();
+                canvasHelperCtx.closePath();
+            }
+
+            canvasHelperCtx.beginPath();
+            var svmSize;
+
+            if (switchFig == 'quad') {
+                var workDiametr = (circleRadius * 2) - 4; // may be some paddings here
+                svmSize = Math.floor(workDiametr / Math.sqrt(2));
+                var padding = (this.size - svmSize) / 2;
+                var svmPos = {x: padding + svmSize, y: padding + svmSize / 2}; // start middle point
+                svmPos.y = svmPos.y - (svmSize / 2);
+                canvasHelperCtx.moveTo(svmPos.x, svmPos.y); // right top
+                canvasHelperCtx.lineTo(svmPos.x - svmSize, svmPos.y);  // left tp
+                canvasHelperCtx.lineTo(svmPos.x - svmSize, svmPos.y + svmSize); // left bottom
+                canvasHelperCtx.lineTo(svmPos.x, svmPos.y + svmSize); // right bottom
+
+            } else {
+                svmSize = Math.floor((2 * circleRadius - 4) * Math.sin(toRadians(60))); // side size
+                var svmPos = {x: circleRadius * 2 + (circleRadiusMain - circleRadius), y: this.size / 2}; // start middle point
+                var h = ((Math.sqrt(3) / 2) * svmSize);
+                canvasHelperCtx.moveTo(svmPos.x, svmPos.y);
+                canvasHelperCtx.lineTo(svmPos.x - h, svmPos.y - (svmSize / 2)); // top 
+                canvasHelperCtx.lineTo(svmPos.x - h, svmPos.y + (svmSize / 2)); // bottom
+                canvasHelperCtx.lineTo(svmPos.x, svmPos.y);
+            }
+
+            canvasHelperCtx.lineTo(svmPos.x, svmPos.y);
+
+
+            canvasHelperCtx.fillStyle = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 1)';
+            canvasHelperCtx.fill();
+            canvasHelperCtx.lineWidth = this.lineWidth;
+            canvasHelperCtx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+            canvasHelperCtx.stroke();
+            canvasHelperCtx.closePath();
+
+
+            this.imageData[method] = canvasHelperCtx.getImageData(0, 0, canvasHelper.width, canvasHelper.width);
+            ctx.drawImage(canvasHelper, this.position.x, this.position.y);
+
+        }
+
+        styleSwitch.isDotIn = function (dot) {
+            if (
+                    dot.x >= this.position.x && dot.x <= this.position.x + this.size &&
+                    dot.y >= this.position.y && dot.y <= this.position.y + this.size
+                    ) {
+                return true;
+            }
+
+            //if (Math.pow(this.position.x - dot.x, 2) + Math.pow(this.position.y - dot.y, 2) < Math.pow(this.outerRadius, 2)) {
+            //	return true;
+            //}			
+
+            return false;
+        }
+    }
+
+    // triangle colorsavers for left and right side
+    function initColorSaver(align, selected, color) {
+
+        if (!selected)
+            selected = false;
+        else
+            selected = true;
+
+        var colorSaver = new Object;
+        colorSaver.width; // size of side of triangle
+        colorSaver.widthPercentage = 22;
+
+        colorSaver.imageData = null; // last rendered colorsaver image
+        colorSaver.align = align;
+        colorSaver.selected = selected; // current color
+        colorSaver.color = '#ffffff'; // hex color
+        colorSaver.position; // top point of triangle
+        colorSaver.paddingY = -4;
+        colorSaver.paddingX = 4;
+        colorSaver.lineWidth = 1;
+        colorSaver.selectSize = 4;
+
+        if (align == 'right') {
+            colorSaver.paddingX = colorSaver.paddingX * -1;
+        }
+
+        if (colorSaver.selected) {
+            colorSaver.color = hex;
+        }
+
+        if (color) {
+            colorSaver.color = color;
+        }
+
+        colorSaver.updateSize = function () {
+            this.width = parseInt(wheelBlockSize - (wheelBlockSize / 100) * (100 - this.widthPercentage));
+
+            // start render point in global canvas coords
+            if (this.align == 'left') {
+                this.position = {x: 0, y: wheelBlockSize - this.width};
+            } else if (this.align == 'right') {
+                this.position = {x: wheelBlockSize - this.width, y: wheelBlockSize - this.width};
+            }
+        }
+
+        // calc triangle area (same method as for triangle sv figure)
+        colorSaver.calcS = function (p) {
+            return Math.abs((p[1].x - p[0].x) * (p[2].y - p[0].y) - (p[2].x - p[0].x) * (p[1].y - p[0].y)) / 2;
+        }
+
+        colorSaver.isDotIn = function (dot) {
+
+            var path = new Array();
+
+            if (this.align == 'left') {
+                path[0] = {x: this.position.x, y: this.position.y}; // top 
+                path[1] = {x: this.position.x, y: this.position.y + this.width}; // bottom left
+                path[2] = {x: this.position.x + this.width, y: this.position.y + this.width}; // bottom right
+            } else {
+                path[0] = {x: this.position.x + this.width, y: this.position.y}; // top 
+                path[1] = {x: path[0].x, y: path[0].y + this.width}; // bottom right
+                path[2] = {x: path[0].x - this.width, y: this.position.y + this.width}; // bottom left				
+            }
+
+            for (var i = 0; i <= path.length - 1; ++i)
+            {
+                path[i].x += this.paddingX;
+                path[i].y += this.paddingY;
+            }
+
+            var selfS = this.calcS(path);
+
+            var t = [
+                {x: path[0].x, y: path[0].y},
+                {x: path[1].x, y: path[1].y},
+                {x: dot.x, y: dot.y}
+            ];
+
+            var s = this.calcS(t);
+            t[1] = {x: path[2].x, y: path[2].y};
+            s += this.calcS(t);
+            t[0] = {x: path[1].x, y: path[1].y};
+            s += this.calcS(t);
+
+            if (Math.ceil(s) == Math.ceil(selfS))
+                return true;
+            else
+                return false;
+        }
+
+        colorSaver.draw = function () {
+
+            canvasHelper.width = this.width;
+            canvasHelper.height = this.width;
+
+            canvasHelperCtx.clearRect(0, 0, this.width, this.width);
+            canvasHelperCtx.beginPath();
+
+            if (this.align == 'left') {
+                canvasHelperCtx.moveTo(this.lineWidth / 2, this.width - this.lineWidth);
+                canvasHelperCtx.lineTo(this.width, this.width - this.lineWidth);
+                canvasHelperCtx.lineTo(this.lineWidth, this.lineWidth);
+                canvasHelperCtx.lineTo(this.lineWidth, this.width - this.lineWidth);
+            }
+
+            if (this.align == 'right') {
+                canvasHelperCtx.moveTo(this.lineWidth / 2, this.width - this.lineWidth);
+                canvasHelperCtx.lineTo(this.width - this.lineWidth, this.width - this.lineWidth);
+                canvasHelperCtx.lineTo(this.width - this.lineWidth, this.lineWidth);
+                canvasHelperCtx.lineTo(this.lineWidth, this.width - this.lineWidth);
+            }
+
+            if (this.selected) {
+
+                // start draw addition inner figure
+
+                canvasHelperCtx.fillStyle = 'rgba(255,255,255, 1)';
+                canvasHelperCtx.fill();
+
+                canvasHelperCtx.strokeStyle = 'rgba(0, 0, 0, 1)';
+                canvasHelperCtx.stroke();
+                canvasHelperCtx.closePath();
+                canvasHelperCtx.beginPath();
+
+                canvasHelperCtx.lineWidth = this.lineWidth;
+
+                if (this.align == 'left') {
+                    canvasHelperCtx.moveTo(this.selectSize, this.width - this.selectSize);
+                    canvasHelperCtx.lineTo(this.width - this.selectSize * 2, this.width - this.selectSize);
+                    canvasHelperCtx.lineTo(this.selectSize, this.selectSize * 2);
+                    canvasHelperCtx.lineTo(this.selectSize, this.width - this.selectSize);
+                }
+
+                if (this.align == 'right') {
+
+                    canvasHelperCtx.moveTo(this.selectSize * 2, this.width - this.selectSize);
+                    canvasHelperCtx.lineTo(this.width - this.selectSize, this.width - this.selectSize);
+                    canvasHelperCtx.lineTo(this.width - this.selectSize, this.selectSize * 2);
+                    canvasHelperCtx.lineTo(this.selectSize * 2, this.width - this.selectSize);
+                }
+            }
+
+            var rgb = hexToRgb(this.color);
+            canvasHelperCtx.fillStyle = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 1)';
+            canvasHelperCtx.fill();
+            canvasHelperCtx.strokeStyle = 'rgba(0, 0, 0, 1)';
+            canvasHelperCtx.stroke();
+
+            this.imageData = canvasHelperCtx.getImageData(0, 0, this.width, this.width);
+            ctx.drawImage(canvasHelper, this.position.x + this.paddingX, this.position.y + this.paddingY);
+
+        }
+
+        var colorSaverKey = colorSavers.length;
+        colorSavers[colorSaverKey] = colorSaver;
+    }
+
     var wheel = new Object;
     wheel.width = 18;
     wheel.imageData = null; // rendered wheel image data
@@ -76,8 +367,10 @@ function KellyColorPicker(cfg) {
     wheel.outerRadius;
     wheel.outerStrokeStyle = 'rgba(0,0,0,0.2)';
     wheel.innerStrokeStyle = 'rgba(0,0,0,0.2)';
-    wheel.pos; // center point; wheel cursor \ hsv quad \ hsv triangle positioned relative that point
+    wheel.pos; // updates in updateSize() | center point; wheel cursor \ hsv quad \ hsv triangle positioned relative that point
     wheel.draw = function () {
+
+        // put rendered data
 
         if (this.imageData) {
             ctx.putImageData(this.imageData, 0, 0);
@@ -103,7 +396,7 @@ function KellyColorPicker(cfg) {
                     hAngle = 0;
             }
 
-            ctx.globalCompositeOperation = "destination-out";
+            ctx.globalCompositeOperation = "destination-out"; // cut out color wheel inside by circle next
             ctx.beginPath();
             ctx.arc(center, center, this.innerRadius, 0, PI * 2);
 
@@ -129,8 +422,9 @@ function KellyColorPicker(cfg) {
     };
 
     wheel.isDotIn = function (dot) {
-        if (Math.pow(wheel.pos.x - dot.x, 2) + Math.pow(wheel.pos.y - dot.y, 2) < Math.pow(wheel.outerRadius, 2)) {
-            if (Math.pow(wheel.pos.x - dot.x, 2) + Math.pow(wheel.pos.y - dot.y, 2) > Math.pow(wheel.innerRadius, 2)) {
+        // is dot in circle
+        if (Math.pow(this.pos.x - dot.x, 2) + Math.pow(this.pos.y - dot.y, 2) < Math.pow(this.outerRadius, 2)) {
+            if (Math.pow(this.pos.x - dot.x, 2) + Math.pow(this.pos.y - dot.y, 2) > Math.pow(this.innerRadius, 2)) {
                 return true;
             }
         }
@@ -278,6 +572,9 @@ function KellyColorPicker(cfg) {
     };
 
     svCursorMouse.updateCursor = function (newDot) {
+        if (!changeCursor)
+            return;
+
         if (KellyColorPicker.cursorLock)
             return;
 
@@ -293,6 +590,22 @@ function KellyColorPicker(cfg) {
     function constructor(cfg) {
         var criticalError = '', placeName = '';
 
+        // save non-camelased old style options compatibility
+
+        if (cfg.alpha_slider !== undefined) {
+            cfg.alphaSlider = cfg.alpha_slider;
+        }
+
+        if (cfg.input_color !== undefined) {
+            cfg.inputColor = cfg.input_color;
+        }
+
+        if (cfg.input_format !== undefined) {
+            cfg.inputFormat = cfg.input_format;
+        }
+
+        // config apply
+
         if (cfg.input && typeof cfg.input !== 'object') {
             cfg.input = document.getElementById(cfg.input);
             input = cfg.input;
@@ -301,20 +614,24 @@ function KellyColorPicker(cfg) {
             input = cfg.input;
         }
 
+        if (cfg.changeCursor !== undefined) {
+            changeCursor = cfg.changeCursor;
+        }
+
         if (cfg.alpha !== undefined) {
             a = cfg.alpha;
         }
 
-        if (cfg.alpha_slider !== undefined) {
-            alpha = cfg.alpha_slider;
+        if (cfg.alphaSlider !== undefined) {
+            alpha = cfg.alphaSlider;
         }
 
-        if (cfg.input_color !== undefined) {
-            inputColor = cfg.input_color;
+        if (cfg.inputColor !== undefined) {
+            inputColor = cfg.inputColor;
         }
 
-        if (cfg.input_format !== undefined) {
-            inputFormat = cfg.input_format;
+        if (cfg.inputFormat !== undefined) {
+            inputFormat = cfg.inputFormat;
         }
 
         if (cfg.userEvents)
@@ -323,6 +640,24 @@ function KellyColorPicker(cfg) {
         if (cfg.place && typeof cfg.place !== 'object') {
             placeName = cfg.place;
             cfg.place = document.getElementById(cfg.place);
+        }
+
+        if (cfg.resizeWith) {
+
+            if (typeof cfg.resizeWith !== 'object')
+                cfg.resizeWith = document.getElementById(cfg.resizeWith);
+
+            resizeWith = cfg.resizeWith;
+
+            if (resizeWith) {
+                var newSize = getSizeByElement(resizeWith);
+                if (newSize)
+                    cfg.size = getSizeByElement(resizeWith);
+
+                addEventListner(window, "resize", function (e) {
+                    return handler.syncSize(e);
+                }, 'canvas_');
+            }
         }
 
         if (cfg.place) {
@@ -372,10 +707,15 @@ function KellyColorPicker(cfg) {
         }
 
         // hex default #000000
-        if (cfg.color)
-            hex = cfg.color;
-        else if (input && input.value) {
-            var colorData = readColorData(input.value);
+        var colorData = false;
+
+        if (cfg.color) {
+            colorData = readColorData(cfg.color);
+        } else if (input && input.value) {
+            colorData = readColorData(input.value);
+        }
+
+        if (colorData) {
             hex = colorData.h;
             if (alpha)
                 a = colorData.a;
@@ -418,13 +758,52 @@ function KellyColorPicker(cfg) {
             addEventListner(input, "keypress", inputEdit, 'input_edit_');
         }
 
+        if (cfg.colorSaver) {
+            initColorSaver('left', true);
+            initColorSaver('right');
+        }
+
+        if (cfg.methodSwitch) {
+            initStyleSwitch();
+        }
+
         enableEvents();
 
         updateSize();
         handler.setColorByHex(false); // update color info and first draw
     }
 
-	// Read color value from string cString in rgb \ rgba \ hex format 
+    // may be zero in some cases / check before applay
+
+    function getSizeByElement(el) {
+
+        var sizeInfo = el.getBoundingClientRect();
+        var size = 0;
+        var sizeReduse = 0;
+        if (alpha) {
+            sizeReduse = alphaSlider.width + alphaSlider.padding * 2;
+        }
+
+        if (sizeInfo.width > sizeInfo.height)
+            size = sizeInfo.height;
+        if (sizeInfo.height > sizeInfo.width)
+            size = sizeInfo.width;
+
+        size = parseInt(size);
+
+        if (alpha) {
+
+            size -= sizeReduse;
+        }
+
+        if (size <= 0) {
+            return false;
+        }
+
+        return size;
+    }
+
+    // Read color value from string cString in rgb \ rgba \ hex format 
     // falseOnFail = false - return default color #000000 on fail
 
     function readColorData(cString, falseOnFail) {
@@ -478,6 +857,10 @@ function KellyColorPicker(cfg) {
     }
 
     function getSvFigureQuad() {
+
+        if (svFigsPool['quad'])
+            return svFigsPool['quad'];
+
         var quad = new Object;
         quad.size;
         quad.padding = 2;
@@ -614,10 +997,15 @@ function KellyColorPicker(cfg) {
             return true;
         };
 
+        svFigsPool['quad'] = quad;
         return quad;
     }
 
     function getSvFigureTriangle() {
+
+        if (svFigsPool['triangle'])
+            return svFigsPool['triangle'];
+
         var triangle = new Object;
         triangle.size; // сторона равностороннего треугольника
         triangle.padding = 2;
@@ -682,6 +1070,8 @@ function KellyColorPicker(cfg) {
         };
 
         triangle.draw = function () {
+            // no buffer
+
             if (!this.imageData)
                 this.imageData = canvasHelperCtx.createImageData(this.size, this.size);
 
@@ -714,7 +1104,7 @@ function KellyColorPicker(cfg) {
             }
 
             canvasHelperCtx.putImageData(this.imageData, 0, 0);
-            ctx.drawImage(canvasHelper, trX, trY);
+            ctx.drawImage(canvasHelper, trX, trY); // draw with save overlaps transparent things , not direct putImageData that rewrite all pixels
 
             ctx.beginPath();
             ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
@@ -818,6 +1208,7 @@ function KellyColorPicker(cfg) {
             }
         };
 
+        svFigsPool['triangle'] = triangle;
         return triangle;
     }
 
@@ -1065,6 +1456,19 @@ function KellyColorPicker(cfg) {
         canvas.width = width;
         canvas.height = wheelBlockSize;
 
+        for (var i = 0; i <= colorSavers.length - 1; ++i)
+        {
+            colorSavers[i].updateSize();
+        }
+
+        if (styleSwitch) {
+
+            styleSwitch.imageData['triangle'] = null;
+            styleSwitch.imageData['quad'] = null;
+
+            styleSwitch.updateSize();
+        }
+
         svFig.updateSize();
         if (alpha)
             alphaSlider.updateSize();
@@ -1080,7 +1484,8 @@ function KellyColorPicker(cfg) {
 
         if (userEvents["updateinput"]) {
             var callback = userEvents["updateinput"];
-            if (!callback(handler, input, manualEnter)) return;
+            if (!callback(handler, input, manualEnter))
+                return;
         }
 
         var rgba = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + a.toFixed(2) + ')';
@@ -1150,6 +1555,8 @@ function KellyColorPicker(cfg) {
         }, 'wait_action_');
     }
 
+    // mouse detect canvas events
+
     function disableEvents() {
         removeEventListener(canvas, "mousedown", 'wait_action_');
         removeEventListener(canvas, "touchstart", 'wait_action_');
@@ -1180,6 +1587,60 @@ function KellyColorPicker(cfg) {
         return {x: x, y: y};
     }
 
+    function selectColorSaver(key) {
+
+        // disable current selection
+        var previouseSelect = false;
+        for (var i = 0; i <= colorSavers.length - 1; ++i)
+        {
+            if (colorSavers[i].selected)
+                previouseSelect = i;
+            colorSavers[i].selected = false;
+        }
+
+        // select new 
+        var select = false;
+        for (var i = 0; i <= colorSavers.length - 1; ++i)
+        {
+            if (i == key) {
+                colorSavers[i].selected = true;
+                handler.setColorByHex(colorSavers[i].color);
+                select = true;
+                break;
+            }
+        }
+
+        if (select && userEvents["selectcolorsaver"]) {
+            var callback = userEvents["selectcolorsaver"];
+            callback(handler, colorSavers[key]);
+        }
+
+        if (!select && previouseSelect !== false) {
+            colorSavers[previouseSelect].selected = true;
+        }
+
+        return select;
+    }
+
+    function updateColorSavers() {
+
+        for (var i = 0; i <= colorSavers.length - 1; ++i)
+        {
+            if (colorSavers[i].selected)
+                colorSavers[i].color = hex;
+        }
+
+    }
+
+    function drawColorSavers() {
+        if (colorSavers.length) {
+            for (var i = 0; i <= colorSavers.length - 1; ++i)
+            {
+                colorSavers[i].draw();
+            }
+        }
+    }
+
     // вывод интерфейса без курсоров
     // поддерживается буферизация todo добавить буферизацию альфа бара
 
@@ -1189,11 +1650,10 @@ function KellyColorPicker(cfg) {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // put buffered data
         if (rendered) {
             ctx.putImageData(canvasHelperData, 0, 0);
-
-            if (alpha)
-                alphaSlider.draw();
+            drawColorSavers();
             return true;
         }
 
@@ -1204,13 +1664,18 @@ function KellyColorPicker(cfg) {
         if (alpha)
             alphaSlider.draw();
 
-        // поместить текущее отрисованное изображение в буфер
+        drawColorSavers();
+        if (styleSwitch)
+            styleSwitch.draw();
+
+        // поместить текущее отрисованное изображение кольца + sv селектора в буфер
         // notice :
         // при перемещении курсора кольца сохранять буфер все изображение бессмысленно - sv блок постоянно обновляется, поэтому
         // сохраняем уже на событии выхода из процесса перемещения
 
         if (!drag) {
-            canvasHelperData = ctx.getImageData(0, 0, wheelBlockSize, wheelBlockSize);
+            //wheelBlockSize
+            canvasHelperData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             rendered = true;
         }
         return true;
@@ -1293,17 +1758,18 @@ function KellyColorPicker(cfg) {
             KellyColorPicker.activePopUp = false;
     }
 
-	// if 'popupshow' user event is setted and return false - prevent show popup default behavior
-	
+    // if 'popupshow' user event is setted and return false - prevent show popup default behavior
+
     this.popUpShow = function (e) {
         if (popup.tag === false)
             return;
-			
+
         if (userEvents["popupshow"]) {
             var callback = userEvents["popupshow"];
-            if (!callback(handler, e)) return;
+            if (!callback(handler, e))
+                return;
         }
-		
+
         // include once 
         if (!KellyColorPicker.popupEventsInclude) {
             addEventListner(document, "click", function (e) {
@@ -1358,6 +1824,8 @@ function KellyColorPicker(cfg) {
         rgb = hsvToRgb(hsv.h, hsv.s, hsv.v);
         hex = rgbToHex(rgb);
 
+        updateColorSavers();
+
         if (userEvents["change"]) {
             var callback = userEvents["change"];
             callback(handler);
@@ -1367,6 +1835,22 @@ function KellyColorPicker(cfg) {
 
         rendered = false;
         draw();
+    };
+
+    this.setColorForColorSaver = function (cString, align) {
+        var colorData = readColorData(cString, true);
+        if (!colorData)
+            return;
+
+        var colorSaver = handler.getColorSaver(align);
+        if (colorSaver.selected) {
+            this.setColorByHex(cString, false);
+        } else {
+            colorSaver.color = colorData.h;
+            draw();
+        }
+
+        return true;
     };
 
     // update color with redraw canvas and update input hex value
@@ -1416,6 +1900,7 @@ function KellyColorPicker(cfg) {
         hsv.y = dot.y;
 
         rendered = false;
+        updateColorSavers();
         draw();
 
         if (userEvents["change"]) {
@@ -1463,6 +1948,8 @@ function KellyColorPicker(cfg) {
 
         rgb = hsvToRgb(hsv.h, hsv.s, hsv.v);
         hex = rgbToHex(rgb);
+
+        updateColorSavers();
 
         if (userEvents["change"]) {
             var callback = userEvents["change"];
@@ -1553,6 +2040,17 @@ function KellyColorPicker(cfg) {
                 KellyColorPicker.cursorLock = false;
                 handler.alphaMouseUp(e, newDot);
             };
+        } else if (styleSwitch && styleSwitch.isDotIn(newDot)) {
+            handler.setMethod();
+        } else if (colorSavers.length) { // here all items with post check of dot in
+
+            for (var i = 0; i <= colorSavers.length - 1; ++i)
+            {
+                if (colorSavers[i].isDotIn(newDot)) {
+                    selectColorSaver(i);
+                    break;
+                }
+            }
         }
 
         if (move && up) {
@@ -1793,6 +2291,32 @@ function KellyColorPicker(cfg) {
         return wheelBlockSize;
     };
 
+    // if align not setted get selected
+    this.getColorSaver = function (align) {
+        for (var i = 0; i <= colorSavers.length - 1; ++i)
+        {
+            if ((!align && colorSavers[i].selected) || colorSavers[i].align == align) {
+                colorSavers[i].rgb = hexToRgb(colorSavers[i].color);
+                colorSavers[i].hsv = rgbToHsv(colorSavers[i].rgb.r, colorSavers[i].rgb.g, colorSavers[i].rgb.b);
+                return colorSavers[i];
+            }
+        }
+    };
+
+    this.setColorSaver = function (align) {
+
+        if (!align)
+            return false;
+
+        for (var i = 0; i <= colorSavers.length - 1; ++i)
+        {
+            if (colorSavers[i].align == align) {
+                selectColorSaver(i);
+                return colorSavers[i];
+            }
+        }
+    }
+
     this.updateView = function (dropBuffer) {
         if (!ctx)
             return false;
@@ -1809,10 +2333,14 @@ function KellyColorPicker(cfg) {
         return true;
     };
 
-    this.resize = function (size) {
+    // resize canvas, with all data \ full refresh view
+    // if size same as current and refresh variable setted to true - refresh current view anyway
+    // othervise exit with return true
+
+    this.resize = function (size, refresh) {
         if (!ctx)
             return false;
-        if (size == wheelBlockSize)
+        if (size == wheelBlockSize && !refresh)
             return true;
 
         rendered = false;
@@ -1826,9 +2354,53 @@ function KellyColorPicker(cfg) {
         return false;
     };
 
+    this.syncSize = function (e) {
+
+        if (!resizeWith)
+            return false;
+
+        var newSize = getSizeByElement(resizeWith);
+        if (newSize)
+            handler.resize(newSize);
+        return false;
+    }
+
+    this.setMethod = function (newMethod) {
+        if (!newMethod) {
+            newMethod = 'triangle';
+            if (method == 'triangle')
+                newMethod = 'quad';
+        }
+
+        if (newMethod == method)
+            return false;
+        if (method != 'quad' && method != 'triangle')
+            return false;
+
+        method = newMethod;
+
+        if (method == 'quad')
+            svFig = getSvFigureQuad();
+        if (method == 'triangle')
+            svFig = getSvFigureTriangle();
+
+        handler.resize(wheelBlockSize, true);
+
+        if (userEvents["setmethod"]) {
+            var callback = userEvents["setmethod"];
+            callback(handler, method);
+        }
+
+        return true;
+    }
+
     // restore color of input ? 
 
     this.destroy = function () {
+        if (!handler) {
+            return false;
+        }
+
         if (svCursorMouse.curType > 0) {
             KellyColorPicker.cursorLock = false;
             svCursorMouse.initStandartCursor();
@@ -1872,6 +2444,10 @@ function KellyColorPicker(cfg) {
 
         if (place && place.parentNode) {
             place.parentNode.removeChild(place);
+        }
+
+        if (resizeWith) {
+            removeEventListener(window, "resize", 'canvas_');
         }
 
         disableEvents(); // remove canvas events		

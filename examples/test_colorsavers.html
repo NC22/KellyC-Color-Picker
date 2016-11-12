@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Kelly Color Picker</title>
+        <meta charset="UTF-8">
+        <script src="../html5kellycolorpicker.min.js"></script>
+        <style>html,body {height : 100%; width : 100%; overflow : hidden; } body {background : #d4d4d4; font-family: Calibri; padding-top: 12px; text-align : center;} input{border: 0px;}</style>
+    </head>
+    <body>
+    
+        <div id="resize-me" style="width : 50%; height : 50%; margin : 0 auto;">
+            <canvas id="picker"></canvas>
+        </div>
+        
+        <input id="color" value="#54aedb">
+        <script>
+            var colorPicker = new KellyColorPicker(
+                {
+                    place : 'picker', 
+                    resizeWith : 'resize-me', // fit in something element by smaller side of it.  get size from element - body \ div \ etc.
+                    colorSaver : true,
+                    methodSwitch : true,
+                    method : 'triangle',
+                    changeCursor : false, // cursor change disable, may be usefull in some cases
+                    userEvents : {
+                        setmethod : function (handler, newMethod) {
+                           // on change method - triangle \ quad
+                        },
+                        selectcolorsaver : function (handler, colorSaverObj) {
+                            // on click on color saver
+                            
+                            alert(colorSaverObj.color)
+                            // handler.getColorSaver(align) - select colorsaver where align = 'left' | 'right' | false - current slected
+                        },	
+                    }
+                }
+            );
+        </script>
+    </body>
+</html>
