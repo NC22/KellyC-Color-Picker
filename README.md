@@ -28,3 +28,7 @@ See [Wiki](https://github.com/NC22/HTML5-Color-Picker/wiki/) for full documentat
 
 Demo :
 [Example 1](http://catface.ru/colorpicker/examples/attach_to_input.html), [Example 2](http://catface.ru/colorpicker/examples/test_resize_onchange_event.html), [Example 3](http://catface.ru/colorpicker/examples/test_create_and_destroy.html)
+
+## License 
+
+ [GNU General Public License v3](http://www.gnu.org/licenses/gpl.html) 
