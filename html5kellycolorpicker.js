@@ -4,7 +4,7 @@
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
  * @copyright 2015-2016 Rubchuk Vladimir
  * @license   GPLv3
- * @version   1.15
+ * @version   1.16
  *
  * Usage example :
  *
@@ -1566,20 +1566,30 @@ function KellyColorPicker(cfg) {
     }
 
     function getEventDot(e) {
+            
         e = e || window.event;
         var x, y;
         var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
         var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
 
-        if (e.touches) {
+        if (event.type == 'touchend') {
+        
+            x = e.changedTouches[0].clientX + scrollX;
+            y = e.changedTouches[0].clientY + scrollY;
+            
+        } else if (event.type == 'touchmove' || e.touches) {
+        
             x = e.touches[0].clientX + scrollX;
             y = e.touches[0].clientY + scrollY;
+            
         } else {
             // e.pageX e.pageY e.x e.y bad for cross-browser
             x = e.clientX + scrollX;
             y = e.clientY + scrollY;
         }
 
+        // set point to local coordinates
+        
         var rect = canvas.getBoundingClientRect();
         x -= rect.left + scrollX;
         y -= rect.top + scrollY;
