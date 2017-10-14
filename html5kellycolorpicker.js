@@ -1652,7 +1652,8 @@ function KellyColorPicker(cfg) {
     }
 
     // вывод интерфейса без курсоров
-    // поддерживается буферизация todo добавить буферизацию альфа бара
+    // поддерживается буферизация todo добавить буферизацию color saver элементов
+    // вынести буфер альфа слайдера отдельно от колеса и sv блока
 
     function drawColorPicker() {
         if (!ctx)
@@ -2222,7 +2223,15 @@ function KellyColorPicker(cfg) {
 
         var newDot = getEventDot(event);
         svCursorMouse.updateCursor(newDot);
-
+        
+        // todo 
+        // split cached data for sv + h wheel and slider, so we can redraw alpha slider without performanse lost in svMouseMove
+        
+        if (alpha) {
+            rendered = false;
+            draw();
+        }
+        
         if (userEvents["mouseupsv"]) {
             var callback = userEvents["mouseupsv"];
             callback(event, handler, newDot);
