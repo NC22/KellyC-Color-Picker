@@ -2,7 +2,7 @@
  * @category  html5 widgets
  * @package   Kelly
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
- * @copyright 2015-2016 Rubchuk Vladimir
+ * @copyright 2015-2017 Rubchuk Vladimir
  * @license   GPLv3
  * @version   1.16
  *
