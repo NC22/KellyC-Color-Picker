@@ -4,7 +4,7 @@
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
  * @copyright 2015-2017 Rubchuk Vladimir
  * @license   GPLv3
- * @version   1.16
+ * @version   1.17
  *
  * Usage example :
  *
@@ -75,6 +75,7 @@ function KellyColorPicker(cfg) {
     var a = 1;
 
     var resizeWith = false;
+    var resizeSide = false;
 
     var colorSavers = new Array();
 
@@ -451,8 +452,11 @@ function KellyColorPicker(cfg) {
 
     alphaSlider.draw = function () {
         var alphaGrd = ctx.createLinearGradient(0, 0, 0, this.height);
-        alphaGrd.addColorStop(0, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',1)');
-        alphaGrd.addColorStop(1, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
+                
+        var aRgb = hsvToRgb(hsv.h, 1, 1);
+        
+        alphaGrd.addColorStop(0, 'rgba(' + aRgb.r + ',' + aRgb.g + ',' + aRgb.b + ',1)');
+        alphaGrd.addColorStop(1, 'rgba(' + aRgb.r + ',' + aRgb.g + ',' + aRgb.b + ',0)');
 
         ctx.beginPath();
         ctx.rect(this.pos.x, this.pos.y, this.width, this.height);
@@ -642,24 +646,6 @@ function KellyColorPicker(cfg) {
             cfg.place = document.getElementById(cfg.place);
         }
 
-        if (cfg.resizeWith) {
-
-            if (typeof cfg.resizeWith !== 'object')
-                cfg.resizeWith = document.getElementById(cfg.resizeWith);
-
-            resizeWith = cfg.resizeWith;
-
-            if (resizeWith) {
-                var newSize = getSizeByElement(resizeWith);
-                if (newSize)
-                    cfg.size = getSizeByElement(resizeWith);
-
-                addEventListner(window, "resize", function (e) {
-                    return handler.syncSize(e);
-                }, 'canvas_');
-            }
-        }
-
         if (cfg.place) {
             place = cfg.place;
         } else if (input) {
@@ -702,10 +688,6 @@ function KellyColorPicker(cfg) {
         else
             criticalError += '| "place" (' + placeName + ') not not found';
 
-        if (cfg.size && cfg.size > 0) {
-            wheelBlockSize = cfg.size;
-        }
-
         // hex default #000000
         var colorData = false;
 
@@ -731,7 +713,40 @@ function KellyColorPicker(cfg) {
         if (!initCanvas()) {
             criticalError += ' | cant init canvas context';
         }
+        
+        // size of elments init 
+        
+        if (cfg.resizeWith) {
 
+            if (typeof cfg.resizeWith !== 'object')
+                cfg.resizeWith = document.getElementById(cfg.resizeWith);
+            
+            if (resizeWith === true) {
+                resizeWith = canvas;
+            } else {
+                resizeWith = cfg.resizeWith;
+            }
+            
+            if (cfg.resizeSide)
+                resizeSide = cfg.resizeSide;                
+                
+            if (resizeWith) {
+                var newSize = getSizeByElement(resizeWith);
+                if (newSize)
+                    cfg.size = getSizeByElement(resizeWith);
+                
+                addEventListner(window, "resize", function (e) {
+                    return handler.syncSize(e);
+                }, 'canvas_');
+            }
+        }
+                
+        if (cfg.size && cfg.size > 0) {
+            wheelBlockSize = cfg.size;
+        }
+        
+        // size init end
+        
         if (criticalError) {
             if (typeof console !== 'undefined')
                 console.log('KellyColorPicker : ' + criticalError);
@@ -783,14 +798,29 @@ function KellyColorPicker(cfg) {
         if (alpha) {
             sizeReduse = alphaSlider.width + alphaSlider.padding * 2;
         }
-
-        if (sizeInfo.width > sizeInfo.height)
-            size = sizeInfo.height;
-        if (sizeInfo.height > sizeInfo.width)
-            size = sizeInfo.width;
-
+        
+        if (el === canvas) {
+                 if (sizeInfo.width <= sizeInfo.height)
+                size = sizeInfo.height;
+            else if (sizeInfo.height < sizeInfo.width)
+                size = sizeInfo.width; 
+        } else {
+        
+            if (resizeSide) {
+                    if (resizeSide == 'height')
+                    size = sizeInfo.height;
+                else if (resizeSide == 'width')
+                    size = sizeInfo.width;
+            } else {
+                     if (sizeInfo.width > sizeInfo.height)
+                    size = sizeInfo.height;
+                else if (sizeInfo.height >= sizeInfo.width)
+                    size = sizeInfo.width;
+            }
+        }
+        
         size = parseInt(size);
-
+        
         if (alpha) {
 
             size -= sizeReduse;
@@ -1455,6 +1485,11 @@ function KellyColorPicker(cfg) {
 
         canvas.width = width;
         canvas.height = wheelBlockSize;
+        
+        if (resizeWith != canvas) {
+            canvas.style.width = width + 'px';
+            canvas.style.height = wheelBlockSize + 'px';
+        }
 
         for (var i = 0; i <= colorSavers.length - 1; ++i)
         {
