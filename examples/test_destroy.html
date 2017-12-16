@@ -7,7 +7,7 @@
         <style>body {background : #d4d4d4; font-family: Calibri; padding-top: 348px; text-align : center;} input{border: 0px;} a { text-decoration : none;}</style>
     </head>
     <body>
-        <input class="colorpicker" id="color" value="#7049c7" onclick="setTimeout(function() {colorpickers[0].destroy();}, 2000); return false;">
+        <input class="colorpicker" id="color" value="#7049c7" onclick="setTimeout(function() {colorpickers[0].destroy(); document.getElementById('color').value = 'LEFT POP UP delete success'}, 2000); return false;">
 		<input class="colorpicker" id="color2" value="#e45dad">
 		<p><a href="#" onclick="colorpickers[1].resize(colorpickers[1].getSize() + 20); return false;">increase size right</a>&nbsp;|&nbsp;
 		<a href="#" onclick="colorpickers[1].resize(colorpickers[1].getSize() - 20); return false;">decrease size right</a></p>
