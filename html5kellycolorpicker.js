@@ -1607,12 +1607,12 @@ function KellyColorPicker(cfg) {
         var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
         var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
 
-        if (event.type == 'touchend') {
+        if (e.type == 'touchend') {
         
             x = e.changedTouches[0].clientX + scrollX;
             y = e.changedTouches[0].clientY + scrollY;
             
-        } else if (event.type == 'touchmove' || e.touches) {
+        } else if (e.type == 'touchmove' || e.touches) {
         
             x = e.touches[0].clientX + scrollX;
             y = e.touches[0].clientY + scrollY;
