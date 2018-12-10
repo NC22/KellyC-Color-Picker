@@ -1,7 +1,7 @@
 # HTML5-Color-Picker
 
 
-<img src="https://catface.ru/userfiles/media/udata_1544431489_gnjhukop.png" width="128"> <img src="https://catface.ru/userfiles/media/udata_1544431484_hjikvdew.png" width="128">
+<img src="https://catface.ru/userfiles/media/udata_1544431489_gnjhukop.png" height="200"> <img src="https://catface.ru/userfiles/media/udata_1544431484_hjikvdew.png" height="200">
 
 
 A scaleable color picker (color wheel). Attaches to "input" DOM element
