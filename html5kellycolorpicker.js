@@ -4,7 +4,7 @@
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
  * @copyright 2015-2017 Rubchuk Vladimir
  * @license   GPLv3
- * @version   1.17
+ * @version   1.18
  *
  * Usage example :
  *
@@ -672,7 +672,7 @@ function KellyColorPicker(cfg) {
                 popup.tag.style.boxSizing = "content-box";
 
             } else {
-                popup.tag.className = cfg.inputClassName;
+                popup.tag.className = cfg.popupClass;
             }
 
             place = popup.tag;
@@ -1841,8 +1841,10 @@ function KellyColorPicker(cfg) {
         if (alpha) {
             topMargin -= alpha.width + alpha.padding;
         }
-
-        var paddingPopup = parseInt(popup.tag.style.paddingBottom) + parseInt(popup.tag.style.paddingTop);
+        
+        var popupStyle = window.getComputedStyle(popup.tag);
+        
+        var paddingPopup = parseInt(popupStyle.paddingBottom) + parseInt(popupStyle.paddingTop);
         if (paddingPopup <= 0) {
             paddingPopup = 0;
         }

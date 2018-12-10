@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Kelly Color Picker</title>
+        <meta charset="UTF-8">
+        <script src="../html5kellycolorpicker.js"></script>
+        <style>
+            body {
+                background : #d4d4d4; 
+                font-family: Calibri; 
+                padding-top: 348px; 
+                text-align: center;
+            } 
+            
+            input {
+                border: 0px;
+            }
+            
+            .popup-kelly-color-custom {
+                position : absolute;
+                display : none;
+                background-color : rgb(225, 225, 225);
+                border : 1px solid rgb(191, 191, 191);
+                box-shadow : rgba(0, 0, 0, 0.24) 7px 7px 14px -3px;
+                border-radius : 4px;
+                padding : 12px;
+                box-sizing : content-box;
+                left : 0px;
+                bottom : 0px;
+                border-radius: 110px;
+                margin-left: -30px;
+                margin-top: -10px;
+            }
+        </style>
+    </head>
+    <body>
+        <p><b>Press on any input</b></p>
+        <!--<a href="#" onclick="colorpickers[0].resize(colorpickers[0].getCanvas().width + 20); return false;">Resize left</a>-->
+        <input class="colorpicker" id="color" value="rgb(139, 121, 179, 0.54)">
+        <input class="colorpicker" id="color2" value="#e45dad">
+        <input class="colorpicker" id="color3" value="#fff">
+        <p><b>Custom popup class</b></p>
+        <input class="colorpicker-custom" value="#fff">
+        <input class="colorpicker-custom" value="#fff">
+        <input class="colorpicker-custom" value="#fff">
+        <script>
+            // attaches by class
+            
+            var colorpickers = KellyColorPicker.attachToInputByClass('colorpicker', {alpha_slider : true, size : 200});	
+            
+            // colorpicker with custom popup class
+            
+            var colorpickersCustom = KellyColorPicker.attachToInputByClass('colorpicker-custom', {alpha_slider : false, size : 200, popupClass : 'popup-kelly-color-custom'});         
+        </script>
+    </body>
+</html>
