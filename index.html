@@ -4,6 +4,16 @@
     <script src='./html5kellycolorpicker.min.js'></script>
 </head>
 <body>
-test
+
+<canvas id="color-picker"></canvas>
+<input id="color"></input>
+<script> 
+    new KellyColorPicker({
+        place : 'color-picker', 
+        size : 150, 
+        input : 'color',  
+    });
+</script>
+
 </body>
 </html>
