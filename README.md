@@ -30,6 +30,9 @@ Example :
     
 See [Wiki](https://github.com/NC22/HTML5-Color-Picker/wiki/) for full documentation
 
+## Examples 
+
+ <a href="http://nc22.github.io/HTML5-Color-Picker/examples/index.html">List of examples</a>
 
 ## License 
 

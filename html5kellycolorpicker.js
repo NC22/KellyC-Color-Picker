@@ -4,7 +4,7 @@
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
  * @copyright 2015-2017 Rubchuk Vladimir
  * @license   GPLv3
- * @version   1.18
+ * @version   1.19
  *
  * Usage example :
  *
@@ -508,28 +508,32 @@ function KellyColorPicker(cfg) {
     };
 
     // svCursorMouse - для устройств с мышкой, генератор указателя в зависимости от активной области
-    // todo on very very small sv when set by hex, cursor may be go out of bonds
+    // todo on very very small sv when set by hex, cursor may be go out of bounds
     var svCursorMouse = new Object;
 
     svCursorMouse.svCursorData = null;
     svCursorMouse.stCursor = null; // cursor before replace
     svCursorMouse.curType = 0; // if > 0 cursor switched by KellyColorPicker to custom
     svCursorMouse.size = 16;
+    svCursorMouse.cEl = document.body;
 
     svCursorMouse.initSvCursor = function () {
         if (!canvas)
             return false;
-        var el = document.body;
 
         this.curType = 1;
 
-        if (!this.stCursor)
-            this.stCursor = el.style.cursor;
-        if (!this.stCursor)
-            this.stCursor = 'auto';
+        if (!this.stCursor) {
+            
+            this.stCursor = window.getComputedStyle(this.cEl).cursor;            
+                
+            if (!this.stCursor) {
+                this.stCursor = 'auto';
+            }
+        }        
 
         if (this.svCursorData) {
-            el.style.cursor = this.svCursorData;
+            this.cEl.style.cursor = this.svCursorData;
             return true;
         }
 
@@ -560,10 +564,10 @@ function KellyColorPicker(cfg) {
         if (!this.svCursorData)
             return false;
 
-        el.style.cursor = this.svCursorData;
-        if (el.style.cursor.indexOf(curImageData) === -1) { // for autist IE (Edge also), that not support data-uri for cursor -_-
+        this.cEl.style.cursor = this.svCursorData;
+        if (this.cEl.style.cursor.indexOf(curImageData) === -1) { // for autist IE (Edge also), that not support data-uri for cursor -_-
             this.svCursorData = 'crosshair';
-            el.style.cursor = 'crosshair';
+            this.cEl.style.cursor = 'crosshair';
         }
         return true;
     };
@@ -571,8 +575,9 @@ function KellyColorPicker(cfg) {
     svCursorMouse.initStandartCursor = function () {
         if (!this.stCursor)
             return;
+        
         svCursorMouse.curType = 0;
-        document.body.style.cursor = this.stCursor;
+        this.cEl.style.cursor = this.stCursor;
     };
 
     svCursorMouse.updateCursor = function (newDot) {
@@ -718,10 +723,10 @@ function KellyColorPicker(cfg) {
         
         if (cfg.resizeWith) {
 
-            if (typeof cfg.resizeWith !== 'object')
+            if (typeof cfg.resizeWith !== 'object' && typeof cfg.resizeWith !== 'boolean')
                 cfg.resizeWith = document.getElementById(cfg.resizeWith);
             
-            if (resizeWith === true) {
+            if (cfg.resizeWith === true) {
                 resizeWith = canvas;
             } else {
                 resizeWith = cfg.resizeWith;
