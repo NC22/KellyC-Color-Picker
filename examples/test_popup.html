@@ -8,12 +8,16 @@
             body {
                 background : #d4d4d4; 
                 font-family: Calibri; 
-                padding-top: 348px; 
                 text-align: center;
             } 
             
+            .wrap {                
+                padding-top: 150px; 
+            }
+            
             input {
                 border: 0px;
+                padding : 6px;
             }
             
             .popup-kelly-color-custom {
@@ -34,15 +38,19 @@
         </style>
     </head>
     <body>
-        <p><b>Press on any input</b></p>
-        <!--<a href="#" onclick="colorpickers[0].resize(colorpickers[0].getCanvas().width + 20); return false;">Resize left</a>-->
-        <input class="colorpicker" id="color" value="rgb(139, 121, 179, 0.54)">
-        <input class="colorpicker" id="color2" value="#e45dad">
-        <input class="colorpicker" id="color3" value="#fff">
-        <p><b>Custom popup class</b></p>
-        <input class="colorpicker-custom" value="rgb(139, 121, 179, 0.54)">
-        <input class="colorpicker-custom" value="#e45dad">
-        <input class="colorpicker-custom" value="#fff">
+        <p style="margin-bottom : 120px;"><a href="index.html" style="font-size: 16px; color: #6d5ad6; font-weight: bold;">Home</a></p>
+        
+        <div class="wrap">
+            <p><b>Press on any input</b></p>
+            <!--<a href="#" onclick="colorpickers[0].resize(colorpickers[0].getCanvas().width + 20); return false;">Resize left</a>-->
+            <input class="colorpicker" id="color" value="rgb(139, 121, 179, 0.54)">
+            <input class="colorpicker" id="color2" value="#e45dad">
+            <input class="colorpicker" id="color3" value="#fff">
+            <p><b>Custom popup class</b></p>
+            <input class="colorpicker-custom" value="rgb(139, 121, 179, 0.54)">
+            <input class="colorpicker-custom" value="#e45f5d">
+            <input class="colorpicker-custom" value="#ffe458">
+        </div>
         <script>
             // attaches by class
             

@@ -3,22 +3,48 @@
     <head>
         <title>Kelly Color Picker</title>
         <meta charset="UTF-8">
-        <script src="../html5kellycolorpicker.min.js"></script>
-        <style>html,body {height : 100%; width : 100%; overflow : hidden; } body {background : #d4d4d4; font-family: Calibri; padding-top: 12px; text-align : center;} input{border: 0px;}</style>
+        <script src="../html5kellycolorpicker.js"></script>
+        <style>
+            html,body {height : 100%; width : 100%; overflow : hidden; }
+            body {background : #d4d4d4; font-family: Calibri; padding-top: 12px; text-align : center;} 
+            input{width : 100%; padding : 6px; border: 0px; box-sizing: border-box;}
+            
+            #wraper {
+                margin-top : 15px;
+            }
+            
+            #picker-self-resized {
+                
+                width : 100%;
+            }
+            
+            .picker-block {
+                padding : 12px;
+                width : 30%;
+                margin : 0 auto;
+                max-width : 250px;
+                text-align : center;
+            }
+            </style>
     </head>
     <body>
-    
-        <div id="resize-me" style="width : 50%; height : 50%; margin : 0 auto;">
-            <canvas id="picker"></canvas>
-        </div>
+        <p style="margin-bottom : 120px;"><a href="index.html" style="font-size: 16px; color: #6d5ad6; font-weight: bold;">Home</a></p>
         
-        <input id="color" value="#54aedb">
+        <div id="wraper">
+            <!-- Redraw on resize window -->
+            <p>Resizable (redraw canvas on window.resize event)</p>
+            <div class="picker-block">
+                <canvas id="picker-self-resized"></canvas>
+                
+                <input id="color" value="#ff1b7c">
+            </div>
+        </div>
         <script>
-            var colorPicker = new KellyColorPicker(
+            var picker = new KellyColorPicker(
                 {
                     input : 'color',
-                    place : 'picker', 
-                    resizeWith : 'resize-me', // fit in something element by smaller side of it.  get size from element - body \ div \ etc.
+                    place : 'picker-self-resized', 
+                    resizeWith : true, // if true - redraw on resize according to current element bounds else - get size from 'resizeWith' element - body \ div \ etc.
                     colorSaver : true,
                     methodSwitch : true,
                     method : 'triangle',
@@ -36,6 +62,8 @@
                     }
                 }
             );
+            
+            picker.setColorForColorSaver('#ff9f37', 'right');
         </script>
     </body>
 </html>
