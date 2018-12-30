@@ -1905,6 +1905,14 @@ function KellyColorPicker(cfg) {
 
         return true;
     };
+    
+    this.setColor = function(inputColor, manualEnter) {
+        
+        // synonym, since setColorByHex already accept color in different formats, not only in hex
+        
+        handler.setColorByHex(inputColor, manualEnter);
+        
+    } 
 
     // update color with redraw canvas and update input hex value
     // now support rgba \ rgb string format input
