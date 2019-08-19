@@ -838,7 +838,7 @@ function KellyColorPicker(cfg) {
         return size;
     }
 
-    // Read color value from string cString in rgb \ rgba \ hex format 
+    // Read color value from string cString in rgb \ rgba \ hex \ hsl \ hsla format 
     // falseOnFail = false - return default color #000000 on fail
 
     function readColorData(cString, falseOnFail) {
@@ -846,40 +846,57 @@ function KellyColorPicker(cfg) {
         var h = false;
 
         cString = cString.trim(cString);
-        if (cString.length <= 7) { // hex color
-            if (cString.charAt(0) == '#')
-                cString = cString.slice(1);
-
-            if (cString.length == 3)
-                h = cString + cString;
-            else if (cString.length == 6)
-                h = cString;
-
-            //if (h && !h.match(/^#([0-9A-F]){3}$|^#([0-9A-F]){6}$/img)) h = false;			
-
-        } else if (cString.substring(0, 3) == 'rgb') {
-            var rgba = cString.split(",");
-
-            if (rgba.length >= 3 && rgba.length <= 4) {
-                rgba[0] = rgba[0].replace("rgba(", "");
-                rgba[0] = rgba[0].replace("rgb(", "");
-
-                var rgb = {r: parseInt(rgba[0]), g: parseInt(rgba[1]), b: parseInt(rgba[2])};
-
-                if (rgb.r <= 255 && rgb.g <= 255 && rgb.b <= 255) {
-
-                    h = rgbToHex(rgb);
-
-                    if (rgba.length == 4) {
-                        alpha = parseFloat(rgba[3]);
-                        if (!alpha || alpha < 0)
-                            alpha = 0;
-                        if (alpha > 1)
-                            alpha = 1;
-                    }
-                }
+		
+		if (cString.indexOf("(") == -1) { // hex color
+			if (cString.charAt(0) == '#')
+				cString = cString.slice(1);
+			h = cString;
+			if (cString.length >= 3 && cString.length <= 4) {
+				h = "";
+				for (let i = 0; i < cString.length; i++) {
+					h += cString[i] + cString[i];
+				}
             }
-        }
+            if (h.length == 8)
+                alpha = (parseInt(h, 16) & 255) / 255;
+
+		} else {
+			vals = cString.split(",");
+			if (vals.length >= 3) {
+				switch (cString.substring(0, 3)) {
+					case 'rgb':
+						vals[0] = vals[0].replace("rgba(", "");
+						vals[0] = vals[0].replace("rgb(", "");
+
+						var rgb = {r: parseInt(vals[0]), g: parseInt(vals[1]), b: parseInt(vals[2])};
+
+						if (rgb.r <= 255 && rgb.g <= 255 && rgb.b <= 255) {
+							h = rgbToHex(rgb);
+						}
+						break;
+					case 'hsl':
+						vals[0] = vals[0].replace("hsl(", "");
+						vals[0] = vals[0].replace("hsla(", "");
+						
+						let hue = parseFloat(vals[0]) / 360.0;
+						let s = parseFloat(vals[1]) / 100.0; //js will ignore % in the end
+						let l = parseFloat(vals[2]) / 100.0;
+						
+						if (hue >= 0 && s <= 1 && l <= 1) {
+							rgb = hsvToRgb(hue, s, l);
+							h = rgbToHex(rgb);
+						}
+						break;
+				}
+				if (vals.length == 4) {
+					alpha = parseFloat(vals[3]);
+					if (!alpha || alpha < 0)
+						alpha = 0;
+					if (alpha > 1)
+						alpha = 1;
+				}
+			}
+		}
 
         if (h === false && falseOnFail)
             return false;
@@ -1527,17 +1544,27 @@ function KellyColorPicker(cfg) {
             if (!callback(handler, input, manualEnter))
                 return;
         }
-
-        var rgba = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + a.toFixed(2) + ')';
+        
+        let aStr = a.toFixed(2);
+        let rgba = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + aStr + ')';
 
         if (!manualEnter) {
-            if (a < 1 && inputFormat === 'mixed') {
-                input.value = rgba;
-            } else {
-                if (inputFormat === 'hex' || inputFormat === 'mixed')
+            switch (inputFormat) {
+                case 'mixed':
+                    if (a < 1)
+                        input.value = rgba;
+                    else
+                        input.value = hex;
+                    break;
+                case 'hex':
                     input.value = hex;
-                else
+                    break;
+                case 'hsla':
+                    input.value = 'hsla(' + (hsv.h * 360).toFixed(2) + ', ' + (hsv.s * 100).toFixed(2) + '%, ' + (hsv.v * 100).toFixed(2) + '%, ' + aStr + ')';
+                    break;
+                default:
                     input.value = rgba;
+                    break;
             }
         }
 
@@ -1916,6 +1943,7 @@ function KellyColorPicker(cfg) {
 
     // update color with redraw canvas and update input hex value
     // now support rgba \ rgb string format input
+    // and also hsla \ hsl
 
     this.setColorByHex = function (inputHex, manualEnter) {
 
