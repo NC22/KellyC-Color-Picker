@@ -4,7 +4,7 @@
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
  * @copyright 2015-2017 Rubchuk Vladimir
  * @license   GPLv3
- * @version   1.19
+ * @version   1.2
  *
  * Usage example :
  *
@@ -839,72 +839,114 @@ function KellyColorPicker(cfg) {
     }
 
     // Read color value from string cString in rgb \ rgba \ hex \ hsl \ hsla format 
-    // falseOnFail = false - return default color #000000 on fail
+    // return array {h : color in rgb hex format (string #000000), a : alpha (float value from 0 to 1) }
+    // falseOnFail = false - return default array on fail {h : '#000000', a : 1} or return false on fail if true
 
     function readColorData(cString, falseOnFail) {
         var alpha = 1;
         var h = false;
 
         cString = cString.trim(cString);
-		
-		if (cString.indexOf("(") == -1) { // hex color
-			if (cString.charAt(0) == '#')
-				cString = cString.slice(1);
-			h = cString;
-			if (cString.length >= 3 && cString.length <= 4) {
-				h = "";
-				for (let i = 0; i < cString.length; i++) {
-					h += cString[i] + cString[i];
-				}
+        
+        if (cString.indexOf("(") == -1) { // hex color
+        
+            if (cString.charAt(0) == '#')
+                cString = cString.slice(1);
+            
+            cString = cString.substr(0, 8);
+            
+            if (cString.length >= 3) {
+                
+                if (cString.length > 6 && cString.length < 8) {
+                    cString = cString.substr(0, 6); // bad alpha data
+                }
+                
+                if (cString.length > 3 && cString.length < 6) {
+                    cString = cString.substr(0, 3); // bad full format 
+                }
+                
+                h = cString;
+                
+                // complite full format, by replicating the R, G, and B values 
+                
+                if (cString.length >= 3 && cString.length <= 4) {
+                    
+                    h = "";
+                    
+                    for (let i = 0; i < cString.length; i++) {
+                        h += cString[i] + cString[i];
+                    }
+                }
+                
+                if (h.length == 8)
+                    alpha = (parseInt(h, 16) & 255) / 255;
+                
             }
-            if (h.length == 8)
-                alpha = (parseInt(h, 16) & 255) / 255;
+            
+        } else {
+            
+            vals = cString.split(",");
+            
+            if (vals.length >= 3) {
+                
+                switch (cString.substring(0, 3)) {
+                    
+                    case 'rgb':
+                    
+                        vals[0] = vals[0].replace("rgba(", "");
+                        vals[0] = vals[0].replace("rgb(", "");
 
-		} else {
-			vals = cString.split(",");
-			if (vals.length >= 3) {
-				switch (cString.substring(0, 3)) {
-					case 'rgb':
-						vals[0] = vals[0].replace("rgba(", "");
-						vals[0] = vals[0].replace("rgb(", "");
+                        var rgb = {r: parseInt(vals[0]), g: parseInt(vals[1]), b: parseInt(vals[2])};
 
-						var rgb = {r: parseInt(vals[0]), g: parseInt(vals[1]), b: parseInt(vals[2])};
-
-						if (rgb.r <= 255 && rgb.g <= 255 && rgb.b <= 255) {
-							h = rgbToHex(rgb);
-						}
-						break;
-					case 'hsl':
-						vals[0] = vals[0].replace("hsl(", "");
-						vals[0] = vals[0].replace("hsla(", "");
-						
-						let hue = parseFloat(vals[0]) / 360.0;
-						let s = parseFloat(vals[1]) / 100.0; //js will ignore % in the end
-						let l = parseFloat(vals[2]) / 100.0;
-						
-						if (hue >= 0 && s <= 1 && l <= 1) {
-							rgb = hsvToRgb(hue, s, l);
-							h = rgbToHex(rgb);
-						}
-						break;
-				}
-				if (vals.length == 4) {
-					alpha = parseFloat(vals[3]);
-					if (!alpha || alpha < 0)
-						alpha = 0;
-					if (alpha > 1)
-						alpha = 1;
-				}
-			}
-		}
+                        if (rgb.r <= 255 && rgb.g <= 255 && rgb.b <= 255) {
+                            h = rgbToHex(rgb);
+                        }
+                        
+                        break;
+                        
+                    case 'hsl':
+                    
+                        vals[0] = vals[0].replace("hsl(", "");
+                        vals[0] = vals[0].replace("hsla(", "");
+                        
+                        let hue = parseFloat(vals[0]) / 360.0;
+                        let s = parseFloat(vals[1]) / 100.0; //js will ignore % in the end
+                        let l = parseFloat(vals[2]) / 100.0;
+                        
+                        if (hue >= 0 && s <= 1 && l <= 1) {
+                            rgb = hsvToRgb(hue, s, l);
+                            h = rgbToHex(rgb);
+                        }
+                        
+                        break;
+                }
+                
+                if (vals.length == 4) {
+                    
+                    alpha = parseFloat(vals[3]);
+                    
+                    if (!alpha || alpha < 0)
+                        alpha = 0;
+                    
+                    if (alpha > 1) 
+                        alpha = 1;                    
+                }
+            }
+        }
 
         if (h === false && falseOnFail)
             return false;
+        
         if (h === false)
             h = '000000';
-
-        if (h.charAt(0) != '#')
+   
+        if (h.charAt(0) != '#') {
+            h = h.substr(0, 6);
             h = '#' + h;
+        } else {
+            h = h.substr(0, 7); // for private purposes must contain only rgb part
+        }
+        
         return {h: h, a: alpha};
     }
 
@@ -1820,9 +1862,10 @@ function KellyColorPicker(cfg) {
     }
 
     this.popUpClose = function (e) {
+        
         if (popup.tag === false)
             return;
-
+       
         if (e) {
             // todo check when select color and then unpress button out of bounds
             if (e.target == input || e.target == canvas)
@@ -1830,8 +1873,13 @@ function KellyColorPicker(cfg) {
             if (e.target == popup.tag)
                 return false;
         }
+ 
+        if (userEvents["popupclose"] && !userEvents["popupclose"](handler, e)) {
+            return;
+        }
 
         popup.tag.style.display = 'none';
+        
         if (KellyColorPicker.activePopUp == handler)
             KellyColorPicker.activePopUp = false;
     }
@@ -1842,10 +1890,8 @@ function KellyColorPicker(cfg) {
         if (popup.tag === false)
             return;
 
-        if (userEvents["popupshow"]) {
-            var callback = userEvents["popupshow"];
-            if (!callback(handler, e))
-                return;
+        if (userEvents["popupshow"] && !userEvents["popupshow"](handler, e)) {
+            return;
         }
 
         // include once 
@@ -2345,9 +2391,11 @@ function KellyColorPicker(cfg) {
     this.getInput = function () {
         return input;
     };
+    
     this.getSvFig = function () {
         return svFig;
     };
+    
     this.getSvFigCursor = function () {
         return svCursor;
     };
@@ -2355,6 +2403,7 @@ function KellyColorPicker(cfg) {
     this.getWheel = function () {
         return wheel;
     };
+    
     this.getWheelCursor = function () {
         return wheelCursor;
     };
@@ -2362,18 +2411,23 @@ function KellyColorPicker(cfg) {
     this.getCurColorHsv = function () {
         return hsv;
     };
+    
     this.getCurColorRgb = function () {
         return rgb;
     };
+    
     this.getCurColorHex = function () {
         return hex;
     };
+    
     this.getCurColorRgba = function () {
         return {r: rgb.r, g: rgb.g, b: rgb.b, a: a};
     };
+    
     this.getCurAlpha = function () {
         return a;
     };
+    
     this.getAlphaFig = function () {
         if (alpha)
             return alphaSlider;
@@ -2384,6 +2438,7 @@ function KellyColorPicker(cfg) {
     this.getPopup = function () {
         return popup;
     };
+    
     this.getSize = function () {
         return wheelBlockSize;
     };
