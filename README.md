@@ -28,11 +28,11 @@ Example :
         });
     </script>
     
-See [Wiki](https://github.com/NC22/HTML5-Color-Picker/wiki/) for full documentation
+See [Wiki](//github.com/NC22/HTML5-Color-Picker/wiki/) for full documentation
 
 ## Demo | Examples 
 
- <a href="http://nc22.github.io/HTML5-Color-Picker/examples/index.html">List of examples</a>
+ <a href="//nc22.github.io/HTML5-Color-Picker/examples/index.html">List of examples</a>
 
 ## License 
 
