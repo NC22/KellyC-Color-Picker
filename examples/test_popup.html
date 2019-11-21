@@ -4,6 +4,8 @@
         <title>Kelly Color Picker</title>
         <meta charset="UTF-8">
         <script src="../html5kellycolorpicker.min.js"></script>
+        <link href="common.css" rel="stylesheet">
+      
         <style>
             body {
                 background : #d4d4d4; 
@@ -38,32 +40,39 @@
         </style>
     </head>
     <body>
-        <p style="margin-bottom : 120px;"><a href="index.html" style="font-size: 16px; color: #6d5ad6; font-weight: bold;">Home</a></p>
+            
+        <div class="example-wrap example-wrap-test-6">
+            
+            <p class="example-top">
+                <a href="index.html">Home</a>
+            </p>
+            
+            <div class="wrap">
+                <p><b>Press on any input</b></p>
+                <!--<a href="#" onclick="colorpickers[0].resize(colorpickers[0].getCanvas().width + 20); return false;">Resize left</a>-->
+                <input class="colorpicker" id="color" value="rgb(139, 121, 179, 0.54)">
+                <input class="colorpicker" id="color2" value="#e45dad">
+                <input class="colorpicker" id="color3" value="#fff">
+                <p><b>Custom popup class</b></p>
+                <input class="colorpicker-custom" value="rgb(139, 121, 179, 0.54)">
+                <input class="colorpicker-custom" value="#e45f5d">
+                <input class="colorpicker-custom" value="#ffe458">
+            </div>
+            <script>
+                // attaches by class
+                
+                var colorpickers = KellyColorPicker.attachToInputByClass('colorpicker', {alpha_slider : true, size : 200});	
+                
+                // same, but test attaches by ids
+                
+                // new KellyColorPicker({input : 'color', alpha_slider : true, size : 150});
+                // new KellyColorPicker({input : 'color2', size : 150});
+                
+                // colorpicker with custom popup class
+                
+                var colorpickersCustom = KellyColorPicker.attachToInputByClass('colorpicker-custom', {alpha_slider : false, size : 200, popupClass : 'popup-kelly-color-custom'});         
+            </script>
         
-        <div class="wrap">
-            <p><b>Press on any input</b></p>
-            <!--<a href="#" onclick="colorpickers[0].resize(colorpickers[0].getCanvas().width + 20); return false;">Resize left</a>-->
-            <input class="colorpicker" id="color" value="rgb(139, 121, 179, 0.54)">
-            <input class="colorpicker" id="color2" value="#e45dad">
-            <input class="colorpicker" id="color3" value="#fff">
-            <p><b>Custom popup class</b></p>
-            <input class="colorpicker-custom" value="rgb(139, 121, 179, 0.54)">
-            <input class="colorpicker-custom" value="#e45f5d">
-            <input class="colorpicker-custom" value="#ffe458">
         </div>
-        <script>
-            // attaches by class
-            
-            var colorpickers = KellyColorPicker.attachToInputByClass('colorpicker', {alpha_slider : true, size : 200});	
-            
-            // same, but test attaches by ids
-            
-            // new KellyColorPicker({input : 'color', alpha_slider : true, size : 150});
-            // new KellyColorPicker({input : 'color2', size : 150});
-            
-            // colorpicker with custom popup class
-            
-            var colorpickersCustom = KellyColorPicker.attachToInputByClass('colorpicker-custom', {alpha_slider : false, size : 200, popupClass : 'popup-kelly-color-custom'});         
-        </script>
     </body>
 </html>

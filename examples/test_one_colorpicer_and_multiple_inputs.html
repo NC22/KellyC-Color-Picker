@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Kelly Color Picker</title>
+        <meta charset="UTF-8">
+        
+        <link href="common.css" rel="stylesheet">
+        <script src="../html5kellycolorpicker.min.js"></script>
+        
+        <style>.inputs-list {margin-top : 24px;}</style>
+    </head>
+    <body>
+        
+        <div class="example-wrap example-wrap-test-5">
+                
+            <p class="example-top">
+                <a href="index.html">Home</a>
+            </p>
+            
+            <canvas id="canvas"></canvas>
+            
+            <div class="inputs-list">
+                
+                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#ff0000">
+                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#c6ffed">
+                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#ff6b00">
+                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#447fff">
+                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#e7f7ca">
+                
+            </div>
+            <script>
+            var picker = new KellyColorPicker({ 
+                place : 'canvas',    
+                userEvents : { 
+                
+                    change : function(self) {
+                    
+                        // work with your own variables that describe current selected input
+                        
+                        if (!self.selectedInput) return;
+                        if (self.getCurColorHsv().v < 0.5)
+                            self.selectedInput.style.color = "#FFF";
+                        else
+                            self.selectedInput.style.color = "#000";
+
+                        self.selectedInput.value = self.getCurColorHex();    
+                        self.selectedInput.style.background = self.selectedInput.value;   
+                        
+                    }
+                    
+                }
+            });
+
+            // addition user methods \ variables 
+
+            picker.editInput = function(target) {
+
+                if (picker.selectedInput) picker.selectedInput.classList.remove('selected');   
+                if (target) picker.selectedInput = target;
+                if (!picker.selectedInput) return false;
+                
+                picker.selectedInput.classList.add('selected');    
+                picker.setColor(picker.selectedInput.value);
+            }
+
+            // initialize 
+
+            var mInputs = document.getElementsByClassName('multi-input');
+            for (var i = 0; i < mInputs.length; i++) {
+                picker.editInput(mInputs[i]);
+            }
+
+            </script>
+            
+        </div> 
+        
+    </body>
+</html>
