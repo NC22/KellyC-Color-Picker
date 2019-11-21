@@ -54,6 +54,8 @@ a { text-decoration : none;}
     max-width : 640px;
     margin : 0 auto;
     text-align : left;
+    padding : 24px;
+    box-sizing: border-box;
 }
 
 .examples-list ul {
