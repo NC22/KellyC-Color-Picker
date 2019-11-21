@@ -3,46 +3,21 @@
     <head>
         <title>Kelly Color Picker</title>
         <meta charset="UTF-8">
-        <style>
-            body {background : #d4d4d4; font-family: Calibri; padding-top: 48px; text-align : center;} 
-            
-            .examples {
-                max-width : 640px;
-                margin : 0 auto;
-                text-align : left;
-            }
-            
-            .examples ul {
-                text-align : left;
-                margin : 0px;
-                padding : 0px;
-            }
-            
-            .examples li {
-                list-style-type: none;
-                padding: 6px;
-                padding-left : 0px;
-                
-            }
-            
-            .examples li a {
-                font-size: 16px;
-                color: #6d5ad6;
-                font-weight: bold;
-            }
-               
-        </style>
+        
+        <link href="common.css" rel="stylesheet">
+      
     </head>
     <body>
-        <div class="examples">
+        <div class="examples-list">
         <h2>List of expamples</h2>
 		<ul>
-            <li><a href="attach_to_input.html">Attach to input</a></li>
-            <li><a href="test_colorsavers.html">Colorpicker with colorsavers buttons</a></li>
+            <li><a href="test_attach_to_input.html">Attach to input</a></li>
             <li><a href="test_popup.html">Show as popup</a></li>
-            <li><a href="test_resize_onchange_event.html">[Test] Create, modify size of colorpicker (with \ without alpha slider)</a></li>
-            <li><a href="test_create_and_destroy.html">[Test] Dynamic create and destroy many colorpickers</a></li>
-            <li><a href="test_destroy.html">[Test] Auto destroy left input colorpicker, controll size of right colorpicker</a></li>
+            <li><a href="test_one_colorpicer_and_multiple_inputs.html">Attach one colorpicker object to many input elements</a></li>
+            <li><a href="test_colorsavers.html">Colorpicker with addition buttons to store color</a></li>
+            <li><a href="test_resize_onchange_event.html">Create, modify size of colorpicker (init alpha slider)</a></li>
+            <li><a href="test_create_and_destroy.html">Dynamic create and destroy many colorpickers</a></li>
+            <li><a href="test_destroy.html">Auto destroy left input colorpicker, controll size of right colorpicker</a></li>
         </ul>
         </div>
     </body>
