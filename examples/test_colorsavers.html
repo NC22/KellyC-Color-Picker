@@ -39,6 +39,7 @@
             <div id="wraper">
                 <!-- Redraw on resize window -->
                 <p>Resizable (redraw canvas on window.resize event)</p>
+                <p>Current selected color button : <span id="color-button-state"></span></p>
                 <div class="picker-block">
                     <canvas id="picker-self-resized"></canvas>
                     
@@ -56,20 +57,41 @@
                         method : 'triangle',
                         changeCursor : false, // cursor change disable, may be usefull in some cases
                         userEvents : {
+                            change : function(self) {
+                                
+                                if (self.updateColorButtonState) {
+                                    self.updateColorButtonState();
+                                }
+                            },
                             setmethod : function (handler, newMethod) {
                                // on change method - triangle \ quad
                             },
                             selectcolorsaver : function (handler, colorSaverObj) {
                                 // on click on color saver
                                 
-                                alert(colorSaverObj.color)
+                                picker.updateColorButtonState();
                                 // handler.getColorSaver(align) - select colorsaver where align = 'left' | 'right' | false - current slected
                             },	
                         }
                     }
                 );
                 
+                // user functions and vars
+                
+                picker.colorButtonInfoEl = document.getElementById('color-button-state');
+               
+                picker.updateColorButtonState = function() {
+                
+                    if (!picker.colorButtonInfoEl) return;
+                    
+                    var colorButton =  picker.getColorSaver();
+                    if (!colorButton) return;
+                    
+                    picker.colorButtonInfoEl.innerText = 'Side ' + colorButton.align + ' | Color : ' + colorButton.color;
+                };
+                
                 picker.setColorForColorSaver('#ff9f37', 'right');
+                picker.updateColorButtonState();
             </script>
         
         </div>
