@@ -949,8 +949,14 @@ function KellyColorPicker(cfg) {
                  typeof cString.h != 'undefined' && 
                  typeof cString.s != 'undefined' &&
                  typeof cString.l != 'undefined')  {
-                 
-                 h = rgbToHex(hsvToRgb(cString.h, cString.s, cString.l));
+                    
+                cString.h = parseFloat(cString.h) / 360.0;
+                cString.s = parseFloat(cString.s) / 100.0; 
+                cString.l = parseFloat(cString.l) / 100.0;
+           
+                if (cString.h >= 0 && cString.s <= 1 && cString.l <= 1) {
+                    h = rgbToHex(hsvToRgb(cString.h, cString.s, cString.l));
+                }
              }
              
              if (typeof cString.a != 'undefined')  {
