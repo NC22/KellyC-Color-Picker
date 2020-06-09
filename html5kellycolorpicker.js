@@ -4,7 +4,7 @@
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
  * @copyright 2015-2019 Rubchuk Vladimir
  * @license   GPLv3
- * @version   1.20
+ * @version   1.21
  *
  * Usage example :
  *
@@ -838,112 +838,143 @@ function KellyColorPicker(cfg) {
         return size;
     }
 
-    // Read color value from string cString in rgb \ rgba \ hex \ hsl \ hsla format 
+    // Read color value from string cString in rgb \ rgba \ hex \ hsl \ hsla format or from object ex. rgb {r : 255, g : 255, b : 255, a : 1}, hsv {h : 1, s: 1, l : 1, a : 1}
     // return array {h : color in rgb hex format (string #000000), a : alpha (float value from 0 to 1) }
     // falseOnFail = false - return default array on fail {h : '#000000', a : 1} or return false on fail if true
 
     function readColorData(cString, falseOnFail) {
+        
         var alpha = 1;
         var h = false;
 
-        cString = cString.trim(cString);
-        
-        if (cString.indexOf("(") == -1) { // hex color
-        
-            if (cString.charAt(0) == '#')
-                cString = cString.slice(1);
+        if (typeof cString == 'string') {
             
-            cString = cString.substr(0, 8);
+            cString = cString.trim(cString);
             
-            if (cString.length >= 3) {
+            if (cString.indexOf("(") == -1) { // hex color
+            
+                if (cString.charAt(0) == '#')
+                    cString = cString.slice(1);
                 
-                if (cString.length > 6 && cString.length < 8) {
-                    cString = cString.substr(0, 6); // bad alpha data
+                cString = cString.substr(0, 8);
+                
+                if (cString.length >= 3) {
+                    
+                    if (cString.length > 6 && cString.length < 8) {
+                        cString = cString.substr(0, 6); // bad alpha data
+                    }
+                    
+                    if (cString.length > 3 && cString.length < 6) {
+                        cString = cString.substr(0, 3); // bad full format 
+                    }
+                    
+                    h = cString;
+                    
+                    // complite full format, by replicating the R, G, and B values 
+                    
+                    if (cString.length >= 3 && cString.length <= 4) {
+                        
+                        h = "";
+                        
+                        for (let i = 0; i < cString.length; i++) {
+                            h += cString[i] + cString[i];
+                        }
+                    }
+                    
+                    if (h.length == 8)
+                        alpha = (parseInt(h, 16) & 255) / 255;
+                    
                 }
                 
-                if (cString.length > 3 && cString.length < 6) {
-                    cString = cString.substr(0, 3); // bad full format 
-                }
+            } else {
                 
-                h = cString;
+                vals = cString.split(",");
                 
-                // complite full format, by replicating the R, G, and B values 
-                
-                if (cString.length >= 3 && cString.length <= 4) {
+                if (vals.length >= 3) {
                     
-                    h = "";
+                    switch (cString.substring(0, 3)) {
+                        
+                        case 'rgb':
+                        
+                            vals[0] = vals[0].replace("rgba(", "");
+                            vals[0] = vals[0].replace("rgb(", "");
+
+                            var rgb = {r: parseInt(vals[0]), g: parseInt(vals[1]), b: parseInt(vals[2])};
+
+                            if (rgb.r <= 255 && rgb.g <= 255 && rgb.b <= 255) {
+                                h = rgbToHex(rgb);
+                            }
+                            
+                            break;
+                            
+                        case 'hsl':
+                        
+                            vals[0] = vals[0].replace("hsl(", "");
+                            vals[0] = vals[0].replace("hsla(", "");
+                            
+                            var hue = parseFloat(vals[0]) / 360.0;
+                            var s = parseFloat(vals[1]) / 100.0; //js will ignore % in the end
+                            var l = parseFloat(vals[2]) / 100.0;
+                       
+                            if (hue >= 0 && s <= 1 && l <= 1) {
+                                h = rgbToHex(hsvToRgb(hue, s, l));
+                            }
+                            
+                            break;
+                    }
                     
-                    for (let i = 0; i < cString.length; i++) {
-                        h += cString[i] + cString[i];
+                    if (vals.length == 4) {
+                        
+                        alpha = parseFloat(vals[3]);
+                        
+                        if (!alpha || alpha < 0)
+                            alpha = 0;
+                        
+                        if (alpha > 1) 
+                            alpha = 1;                    
                     }
                 }
-                
-                if (h.length == 8)
-                    alpha = (parseInt(h, 16) & 255) / 255;
-                
             }
             
-        } else {
+        } else if (typeof cString == 'object') {
             
-            vals = cString.split(",");
-            
-            if (vals.length >= 3) {
+             if (typeof cString.r != 'undefined' && 
+                 typeof cString.g != 'undefined' &&
+                 typeof cString.b != 'undefined') { // rgb input
+                 
+                h = rgbToHex(cString);
                 
-                switch (cString.substring(0, 3)) {
-                    
-                    case 'rgb':
-                    
-                        vals[0] = vals[0].replace("rgba(", "");
-                        vals[0] = vals[0].replace("rgb(", "");
-
-                        var rgb = {r: parseInt(vals[0]), g: parseInt(vals[1]), b: parseInt(vals[2])};
-
-                        if (rgb.r <= 255 && rgb.g <= 255 && rgb.b <= 255) {
-                            h = rgbToHex(rgb);
-                        }
-                        
-                        break;
-                        
-                    case 'hsl':
-                    
-                        vals[0] = vals[0].replace("hsl(", "");
-                        vals[0] = vals[0].replace("hsla(", "");
-                        
-                        let hue = parseFloat(vals[0]) / 360.0;
-                        let s = parseFloat(vals[1]) / 100.0; //js will ignore % in the end
-                        let l = parseFloat(vals[2]) / 100.0;
-                        
-                        if (hue >= 0 && s <= 1 && l <= 1) {
-                            rgb = hsvToRgb(hue, s, l);
-                            h = rgbToHex(rgb);
-                        }
-                        
-                        break;
-                }
-                
-                if (vals.length == 4) {
-                    
-                    alpha = parseFloat(vals[3]);
-                    
-                    if (!alpha || alpha < 0)
-                        alpha = 0;
-                    
-                    if (alpha > 1) 
-                        alpha = 1;                    
-                }
-            }
+             } else if (
+                 typeof cString.h != 'undefined' && 
+                 typeof cString.s != 'undefined' &&
+                 typeof cString.l != 'undefined')  {
+                 
+                 h = rgbToHex(hsvToRgb(cString.h, cString.s, cString.l));
+             }
+             
+             if (typeof cString.a != 'undefined')  {
+                 
+                 alpha = cString.a;  
+             }             
         }
 
-        if (h === false && falseOnFail)
+        if (h === false && falseOnFail) {
+            
             return false;
+        }
         
-        if (h === false)
+        if (h === false) {
+            
             h = '000000';
-   
+        }
+        
         if (h.charAt(0) != '#') {
+            
             h = h.substr(0, 6);
             h = '#' + h;
+            
         } else {
+            
             h = h.substr(0, 7); // for private purposes must contain only rgb part
         }
         
@@ -1535,14 +1566,14 @@ function KellyColorPicker(cfg) {
             {x: wheel.outerRadius + wheelCursor.paddingX, y: wheelCursor.height * -1},
             {x: wheel.outerRadius + wheelCursor.paddingX, y: wheelCursor.height},
             {x: wheel.innerRadius - wheelCursor.paddingX, y: wheelCursor.height},
-            {x: wheel.innerRadius - wheelCursor.paddingX, y: wheelCursor.height * -1}
+            {x: wheel.innerRadius - wheelCursor.paddingX, y: (wheelCursor.height + (wheelCursor.lineWeight / 2)) * -1}
         ];
 
         var width = wheelBlockSize;
         if (alpha)
             width += alphaSlider.width + alphaSlider.padding * 2;
 
-        if (place.tagName != 'CANVAS') {
+        if (place.tagName.toLowerCase() != 'canvas') {
             place.style.width = width + 'px';
             place.style.height = wheelBlockSize + 'px';
         }
@@ -1824,7 +1855,7 @@ function KellyColorPicker(cfg) {
         }
 
         ctx.beginPath();
-
+        
         var wheelCursorPath = rotatePath2(wheelCursor.path, curAngle, {x: wheel.pos.x, y: wheel.pos.y});
         for (var i = 0; i <= wheelCursorPath.length - 1; ++i)
         {
@@ -1964,6 +1995,7 @@ function KellyColorPicker(cfg) {
     };
 
     this.setColorForColorSaver = function (cString, align) {
+        
         var colorData = readColorData(cString, true);
         if (!colorData)
             return;
