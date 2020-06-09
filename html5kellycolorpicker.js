@@ -2,7 +2,7 @@
  * @category  html5 widgets
  * @package   Kelly
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
- * @copyright 2015-2019 Rubchuk Vladimir
+ * @copyright 2015-2020 Rubchuk Vladimir
  * @license   GPLv3
  * @version   1.21
  *
@@ -13,6 +13,7 @@
  * ToDo :
  * 
  * Add switch color in colorsavers button (analog of X button in Photoshop)
+ * updateConfig method
  *
  **/
 
