@@ -12,80 +12,79 @@
         </style>
     </head>
     <body>        
-    
-        <div class="example-wrap example-wrap-simple example-wrap-test-3">
-            
+        <div class="example-page">
+                  
             <p class="example-top">
-                <a href="index.html">Home</a>
+                <a href="index.html">Back</a> | <a href="https://github.com/NC22/HTML5-Color-Picker">KellyC Color Picker</a> | <a href="https://kellydownloader.com/ru/projects/">List of projects</a> by <a href="https://nradiowave.catface.ru/">nradiowave</a>
             </p>
+        
+            <div class="example-wrap example-wrap-simple example-wrap-test-3">
+                
+               <div id="test-pickers"></div>
             
-            <div id="test-pickers"></div>
+            </div>
+        </div>
+        
+        <script>
+            // create's color wheel with random parametrs
 
-            <script>
-                // create's color wheel with random parametrs
+            function ct() {
 
-                function ct() {
+                // generate random size parametrs
 
-                    // generate random size parametrs
-
-                    var rand = function(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; };
-                    var componentToHex = function(c) {
-                            var hex = c.toString(16);
-                            return hex.length === 1 ? "0" + hex : hex;
-                    };
-
-                    var size = rand(100, 300);
-
-                    var place = document.createElement('DIV');
-                        document.getElementById('test-pickers').appendChild(place);
-
-                    var r = rand(0, 255), g = rand(0, 255), b = rand(0, 255);
-                    var color = "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-                    var method = 'triangle';
-                    if (rand(0,1000) > 500) method = 'quad';
-
-                    var alphaSlider = false;
-                    if (rand(0,1000) > 500) alphaSlider = true;
-
-                    var alpha = rand(0,100) / 100;
-
-                    var colorPicker = new KellyColorPicker({
-                        place : place,
-                        size : size,
-                        method : method,
-                        color : color,
-                        alpha_slider : alphaSlider,
-                        alpha : alpha,
-                    });
-
-                    // set size options to ColorPicker
-
-                    colorPicker.getWheel().width += rand(0,6);
-                    colorPicker.getSvFigCursor().radius += rand(0,4);
-                    colorPicker.getWheelCursor().height += rand(0,4);
-                    var alpha = colorPicker.getAlphaFig();
-                    if (alpha) alpha.width += rand(0,11);
-                    colorPicker.getWheelCursor().lineWeight += rand(0, 1);
-                    colorPicker.getWheel().startAngle += rand(0,11) * 30;
-                    colorPicker.getWheel().outerStrokeStyle = 'rgba(' +r +',' +g +',' +b +', 0.6)';
-                    colorPicker.getWheel().innerStrokeStyle = 'rgba(' +r +',' +g +',' +b +', 0.6)';
-
-                    // update to applay size options
-
-                    colorPicker.updateView(true);
-
-                    return colorPicker;
+                var rand = function(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; };
+                var componentToHex = function(c) {
+                        var hex = c.toString(16);
+                        return hex.length === 1 ? "0" + hex : hex;
                 };
 
-                var testDestroy = ct();
-                setTimeout(function() {testDestroy.destroy();}, 2000);
+                var size = rand(100, 300);
 
-                for (var i=0; i <= 20; ++i)
-                {
-                    ct();
-                }
-            </script>
-        
-        </div>
+                var place = document.createElement('DIV');
+                    document.getElementById('test-pickers').appendChild(place);
+
+                var r = rand(0, 255), g = rand(0, 255), b = rand(0, 255);
+                var color = "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+                var method = 'triangle';
+                if (rand(0,1000) > 500) method = 'quad';
+
+                var alphaSlider = false;
+                if (rand(0,1000) > 500) alphaSlider = true;
+
+                var alpha = rand(0,100) / 100;
+
+                var colorPicker = new KellyColorPicker({
+                    place : place,
+                    size : size,
+                    method : method,
+                    color : color,
+                    alpha_slider : alphaSlider,
+                    alpha : alpha,
+                });
+
+                // set size options to ColorPicker
+
+                colorPicker.getWheel().width += rand(0,6);
+                colorPicker.getSvFigCursor().radius += rand(0,4);
+                colorPicker.getWheelCursor().height += rand(0,4);
+                var alpha = colorPicker.getAlphaFig();
+                if (alpha) alpha.width += rand(0,11);
+                colorPicker.getWheelCursor().lineWeight += rand(0, 1);
+                colorPicker.getWheel().startAngle += rand(0,11) * 30;
+                colorPicker.getWheel().outerStrokeStyle = 'rgba(' +r +',' +g +',' +b +', 0.6)';
+                colorPicker.getWheel().innerStrokeStyle = 'rgba(' +r +',' +g +',' +b +', 0.6)';
+
+                // update to applay size options
+
+                colorPicker.updateView(true);
+
+                return colorPicker;
+            };
+
+            var testDestroy = ct();
+            setTimeout(function() {testDestroy.destroy();}, 2000);
+
+            for (var i=0; i <= 20; ++i) ct();
+        </script>
     </body>
 </html>

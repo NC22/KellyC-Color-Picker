@@ -4,7 +4,6 @@
         <title>Kelly Color Picker</title>
         <meta charset="UTF-8">
         <script src="../html5kellycolorpicker.min.js"></script>    
-        
         <link href="common.css" rel="stylesheet">
       
         <style>
@@ -35,72 +34,80 @@
         </style>
     </head>
     <body>
-        
-        <div class="example-wrap example-wrap-simple example-wrap-test-2">
-            
+    
+        <div class="example-page">
+                  
             <p class="example-top">
-                <a href="index.html">Home</a>
+                <a href="index.html">Back</a> | <a href="https://github.com/NC22/HTML5-Color-Picker">KellyC Color Picker</a> | <a href="https://kellydownloader.com/ru/projects/">List of projects</a> by <a href="https://nradiowave.catface.ru/">nradiowave</a>
             </p>
+            
+            <div class="example-wrap example-wrap-simple example-wrap-test-2">
                 
-            <div id="wraper">
-                <!-- Redraw on resize window -->
-                <p>Resizable (redraw canvas on window.resize event)</p>
-                <p>Current selected color button : <span id="color-button-state"></span></p>
-                <div class="picker-block">
-                    <canvas id="picker-self-resized"></canvas>
+                <div id="wraper">
+                
+                    <!-- Redraw on resize window -->
                     
-                    <input id="color" value="#ff1b7c">
+                    <p>Resizable (redraw canvas on window.resize event)</p>
+                    <p>Current selected color button : <span id="color-button-state"></span></p>
+                    
+                    <div class="picker-block">
+                        <canvas id="picker-self-resized"></canvas>                        
+                        <input id="color" value="#ff1b7c">
+                    </div>
+                    
                 </div>
+                
+            
             </div>
-            <script>
-                var picker = new KellyColorPicker(
-                    {
-                        input : 'color',
-                        place : 'picker-self-resized', 
-                        resizeWith : true, // if true - redraw on resize according to current element bounds else - get size from 'resizeWith' element - body \ div \ etc.
-                        colorSaver : true,
-                        methodSwitch : true,
-                        method : 'triangle',
-                        changeCursor : false, // cursor change disable, may be usefull in some cases
-                        userEvents : {
-                            change : function(self) {
-                                
-                                if (self.updateColorButtonState) {
-                                    self.updateColorButtonState();
-                                }
-                            },
-                            setmethod : function (handler, newMethod) {
-                               // on change method - triangle \ quad
-                            },
-                            selectcolorsaver : function (handler, colorSaverObj) {
-                                // on click on color saver
-                                
-                                picker.updateColorButtonState();
-                                // handler.getColorSaver(align) - select colorsaver where align = 'left' | 'right' | false - current slected
-                            },	
-                        }
-                    }
-                );
-                
-                // user functions and vars
-                
-                picker.colorButtonInfoEl = document.getElementById('color-button-state');
-               
-                picker.updateColorButtonState = function() {
-                
-                    if (!picker.colorButtonInfoEl) return;
-                    
-                    var colorButton =  picker.getColorSaver();
-                    if (!colorButton) return;
-                    
-                    picker.colorButtonInfoEl.innerText = 'Side ' + colorButton.align + ' | Color : ' + colorButton.color;
-                };
-                
-                picker.setColorForColorSaver('#ff9f37', 'right');
-                picker.updateColorButtonState();
-            </script>
         
         </div>
         
+        <script>
+            var picker = new KellyColorPicker(
+                {
+                    input : 'color',
+                    place : 'picker-self-resized', 
+                    resizeWith : true, // if true - redraw on resize according to current element bounds else - get size from 'resizeWith' element - body \ div \ etc.
+                    colorSaver : true,
+                    methodSwitch : true,
+                    method : 'triangle',
+                    changeCursor : false, // cursor change disable, may be usefull in some cases
+                    userEvents : {
+                        change : function(self) {
+                            
+                            if (self.updateColorButtonState) {
+                                self.updateColorButtonState();
+                            }
+                        },
+                        setmethod : function (handler, newMethod) {
+                           // on change method - triangle \ quad
+                        },
+                        selectcolorsaver : function (handler, colorSaverObj) {
+                            // on click on color saver
+                            
+                            picker.updateColorButtonState();
+                            // handler.getColorSaver(align) - select colorsaver where align = 'left' | 'right' | false - current slected
+                        },	
+                    }
+                }
+            );
+            
+            // user functions and vars
+            
+            picker.colorButtonInfoEl = document.getElementById('color-button-state');
+           
+            picker.updateColorButtonState = function() {
+            
+                if (!picker.colorButtonInfoEl) return;
+                
+                var colorButton =  picker.getColorSaver();
+                if (!colorButton) return;
+                
+                picker.colorButtonInfoEl.innerText = 'Side ' + colorButton.align + ' | Color : ' + colorButton.color;
+            };
+            
+            picker.setColorForColorSaver('#ff9f37', 'right');
+            picker.updateColorButtonState();
+        </script>
     </body>
 </html>

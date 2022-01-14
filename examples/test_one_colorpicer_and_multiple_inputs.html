@@ -7,28 +7,44 @@
         <link href="common.css" rel="stylesheet">
         <script src="../html5kellycolorpicker.min.js"></script>
         
-        <style>.inputs-list {margin-top : 24px;}</style>
+        <style>
+            .inputs-list {
+                margin-top : 24px;
+             }
+             
+            .input-quad {
+                width : 64px;
+                height : 64px;
+                display : inline-block;
+            }
+        </style>
     </head>
     <body>
-        
-        <div class="example-wrap example-wrap-test-5">
-                
+        <div class="example-page">
+                  
             <p class="example-top">
-                <a href="index.html">Home</a>
+                <a href="index.html">Back</a> | <a href="https://github.com/NC22/HTML5-Color-Picker">KellyC Color Picker</a> | <a href="https://kellydownloader.com/ru/projects/">List of projects</a> by <a href="https://nradiowave.catface.ru/">nradiowave</a>
             </p>
-            
-            <canvas id="canvas"></canvas>
-            
-            <div class="inputs-list">
                 
-                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#ff0000">
-                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#c6ffed">
-                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#ff6b00">
-                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#447fff">
-                <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#e7f7ca">
+            <div class="example-wrap example-wrap-test-5">
+                 
+                <canvas id="canvas"></canvas>
                 
-            </div>
-            <script>
+                <div class="inputs-list">
+                    
+                    <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#ff0000">
+                    <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#c6ffed">
+                    <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#ff6b00">
+                    <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#447fff">
+                    <input onclick="picker.editInput(event.target)" onchange="picker.editInput(event.target)"  class="multi-input input-quad" value="#e7f7ca">
+                    
+                </div>
+             
+            </div> 
+        
+        </div>    
+        
+        <script>
             var picker = new KellyColorPicker({ 
                 place : 'canvas',    
                 userEvents : { 
@@ -70,9 +86,7 @@
                 picker.editInput(mInputs[i]);
             }
 
-            </script>
+        </script>
             
-        </div> 
-        
     </body>
 </html>

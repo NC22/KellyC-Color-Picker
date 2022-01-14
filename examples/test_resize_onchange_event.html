@@ -11,28 +11,37 @@
             #test-pickers {padding-top: 12px;text-align : center;}
             #test-pickers  div{display : inline-block;}
             #test-pickers  input{width : 150px;}
-            #test-pickers  button{width : 150px;}
+            #test-pickers  button{width: 65px; display : inline-block;}
             #test-gradient {margin: 0 auto;margin-top: 24px;width: 150px;height : 150px;border: 2px solid rgba(176, 53, 165, 0.8);}
         </style>
     </head>
-    <body>            
-        <div class="example-wrap example-wrap-simple example-wrap-test-7">
-                               
+    <body>       
+
+        <div class="example-page">
+                  
             <p class="example-top">
-                <a href="index.html">Home</a>
+                <a href="index.html">Back</a> | <a href="https://github.com/NC22/HTML5-Color-Picker">KellyC Color Picker</a> | <a href="https://kellydownloader.com/ru/projects/">List of projects</a> by <a href="https://nradiowave.catface.ru/">nradiowave</a>
             </p>
             
-            <div id="test-pickers">
-                <div id="test-color-picker-quad"></div>
-                <div id="test-gradient"></div>
-                <div id="test-color-picker-triangle"></div>
-                <p>
-                    <input id="test" type="text" value="none"/>
-                    <button id="test-resize">increase size</button>
-                    <input id="test2" type="text" value="none"/>
-                </p>
-            </div>
-            <script>
+            <div class="example-wrap example-wrap-simple example-wrap-test-7">
+                     
+                <div id="test-pickers">
+                    <div id="test-color-picker-quad"></div>
+                    <div id="test-gradient"></div>
+                    <div id="test-color-picker-triangle"></div>
+                    <p>
+                        <input id="test" type="text" value="none"/>
+                        <button id="test-resize">+</button>
+                        <button id="test-resize-minus" data-minus="1">-</button>
+                        <input id="test2" type="text" value="none"/>
+                    </p>
+                </div>
+               
+            </div> 
+            
+        </div> 
+        
+        <script>
                 var colorPickerQ = new KellyColorPicker({
                     place : 'test-color-picker-quad',
                     size : 150,
@@ -63,28 +72,32 @@
                 colorPickerT.setColorByHex('#3b8db1'); // call on change event to update test-gradient
 
                 // increase size button click
-
-                document.getElementById('test-resize').onclick = function(e) {
+                var resize = function(e) {
+                
+                    var m = this.getAttribute('data-minus') ? -1 : 1;
                     // addition changes
 
-                    colorPickerQ.getWheel().width += 6;
-                    colorPickerT.getWheel().width += 6;
-                    colorPickerQ.getSvFigCursor().radius += 2;
-                    colorPickerT.getSvFigCursor().radius += 2;
-                    colorPickerQ.getWheelCursor().height += 2;
-                    colorPickerT.getWheelCursor().height += 2;
+                    colorPickerQ.getWheel().width += 1 * m;
+                    colorPickerT.getWheel().width += 1 * m;
+                    colorPickerQ.getSvFigCursor().radius += 1 * m;
+                    colorPickerT.getSvFigCursor().radius += 1 * m;
+                    colorPickerQ.getWheelCursor().height += 1 * m;
+                    colorPickerT.getWheelCursor().height += 1 * m;
 
                     // canvase resize
 
-                    colorPickerQ.resize(colorPickerQ.getCanvas().height + 100);
-                    colorPickerT.resize(colorPickerT.getCanvas().height + 100);
+                    colorPickerQ.resize(colorPickerQ.getCanvas().height + (10 * m));
+                    colorPickerT.resize(colorPickerT.getCanvas().height + (10 * m));
 
                     // resize test-gradien block
 
                     document.getElementById('test-gradient').style.width = colorPickerQ.getCanvas().height + 'px';
                     document.getElementById('test-gradient').style.height = colorPickerQ.getCanvas().height + 'px';
                 };
-            </script>
-        </div>
+                
+                document.getElementById('test-resize').onclick = resize;
+                document.getElementById('test-resize-minus').onclick = resize;
+        </script>
+        
     </body>
 </html>

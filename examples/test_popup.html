@@ -7,9 +7,6 @@
         <link href="common.css" rel="stylesheet">
       
         <style>
-            .wrap {                
-                padding-top: 150px; 
-            }
             
             .popup-kelly-color-custom {
                 position : absolute;
@@ -29,25 +26,31 @@
         </style>
     </head>
     <body>
-            
-        <div class="example-wrap example-wrap-test-6">
-            
+        <div class="example-page">
+                  
             <p class="example-top">
-                <a href="index.html">Home</a>
+                <a href="index.html">Back</a> | <a href="https://github.com/NC22/HTML5-Color-Picker">KellyC Color Picker</a> | <a href="https://kellydownloader.com/ru/projects/">List of projects</a> by <a href="https://nradiowave.catface.ru/">nradiowave</a>
             </p>
+                 
+            <div class="example-wrap example-wrap-test-6">
+             
+                <div class="wrap">
+                    <p><b>Press on any input</b></p>
+                    <!--<a href="#" onclick="colorpickers[0].resize(colorpickers[0].getCanvas().width + 20); return false;">Resize left</a>-->
+                    <input class="colorpicker" id="color" value="rgb(139, 121, 179, 0.54)">
+                    <input class="colorpicker" id="color2" value="#e45dad">
+                    <input class="colorpicker" id="color3" value="#fff">
+                    <p><b>Custom popup class</b></p>
+                    <input class="colorpicker-custom" value="rgb(139, 121, 179, 0.54)">
+                    <input class="colorpicker-custom" value="#e45f5d">
+                    <input class="colorpicker-custom" value="#ffe458">
+                </div>
             
-            <div class="wrap">
-                <p><b>Press on any input</b></p>
-                <!--<a href="#" onclick="colorpickers[0].resize(colorpickers[0].getCanvas().width + 20); return false;">Resize left</a>-->
-                <input class="colorpicker" id="color" value="rgb(139, 121, 179, 0.54)">
-                <input class="colorpicker" id="color2" value="#e45dad">
-                <input class="colorpicker" id="color3" value="#fff">
-                <p><b>Custom popup class</b></p>
-                <input class="colorpicker-custom" value="rgb(139, 121, 179, 0.54)">
-                <input class="colorpicker-custom" value="#e45f5d">
-                <input class="colorpicker-custom" value="#ffe458">
             </div>
-            <script>
+            
+        </div>
+        
+        <script>        
                 // attaches by class
                 
                 var colorpickers = KellyColorPicker.attachToInputByClass('colorpicker', {alpha_slider : true, size : 200});	
@@ -60,8 +63,6 @@
                 // colorpicker with custom popup class
                 
                 var colorpickersCustom = KellyColorPicker.attachToInputByClass('colorpicker-custom', {alpha_slider : false, size : 200, popupClass : 'popup-kelly-color-custom'});         
-            </script>
-        
-        </div>
+        </script>
     </body>
 </html>

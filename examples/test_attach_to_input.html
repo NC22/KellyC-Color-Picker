@@ -7,21 +7,25 @@
         
         <link href="common.css" rel="stylesheet">
     </head>
-    <body>        
-        <div class="example-wrap example-wrap-test-1">
-        
+    <body>    
+        <div class="example-page">
+                  
             <p class="example-top">
-                <a href="index.html">Home</a>
+                <a href="index.html">Back</a> | <a href="https://github.com/NC22/HTML5-Color-Picker">KellyC Color Picker</a> | <a href="https://kellydownloader.com/ru/projects/">List of projects</a> by <a href="https://nradiowave.catface.ru/">nradiowave</a>
             </p>
             
-            <canvas id="picker"></canvas>
-            <br>
-            <input id="color" value="#54aedb">
+            <div class="example-wrap example-wrap-test-1">
+                        
+                <canvas id="picker"></canvas>
+                <br>
+                <input id="color" value="#54aedb">
+                
+            </div>
             
-            <script>
-                new KellyColorPicker({place : 'picker', input : 'color', size : 150});
-            </script>
-        </div>
+        </div> 
         
+        <script>
+            new KellyColorPicker({place : 'picker', input : 'color', size : 150});
+        </script>
     </body>
 </html>

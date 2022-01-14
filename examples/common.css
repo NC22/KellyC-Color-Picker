@@ -1,29 +1,61 @@
 /* this file is just describe DEMO pages base style, its not required for correct work of extension */
 
+html, body {
+    width: 100%;
+    margin: 0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    box-sizing: border-box;
+}
 
 body {
-    background : #ececec; 
-    font-family: Calibri; 
-    padding-top: 48px; 
-    text-align : center;
-} 
+    background-color: #8d8d8d;
+    font-family: "Open Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    font-weight: 400;
+    line-height: 1.5;
+    font-size: 14px;
+    color: #cdcdcd;
+    text-align: left;
+}
 
-input {
+a { 
+    text-decoration : none;  
+    color: #dadada;
+}
+
+input, button {
     border: 0px;
     height: 32px;
     text-align: center;
+    height: 40px;
+}
+
+.example-page {
+    max-width : 800px;
+    margin : 0 auto;   
+    background: #5c5c5c;
+    padding: 15px;
+    margin-top: 16px;
+}
+
+.example-wrap p {
+    padding : 6px;
+    font-size : 16px;
 }
 
 .example-wrap {
-    background: #e6e6e6;
-    width: 600px;
-    height: 600px;
-    margin: 0 auto;
-    border: 1px solid #cacaca;
-    border-radius: 4px;
-    -webkit-box-shadow: 1px 2px 10px 0px rgba(0,0,0,0.75);
+    background: #7f7f7f;
+    border-radius: 3px;
     -moz-box-shadow: 1px 2px 10px 0px rgba(0,0,0,0.75);
-    box-shadow: 1px 2px 6px 0px rgba(0,0,0,0.4);
+    margin-top: 60px;
+    text-align: center;
+    padding: 6px;
+    display: inline-block;
 }
 
 .example-wrap-simple {
@@ -32,27 +64,20 @@ input {
     padding-bottom : 64px;
 }
 
-a { text-decoration : none;}
-
-.input-quad {
-    width : 64px;
-    height : 64px;
-    display : inline-block;
+.example-top a {
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration : underline;
 }
 
 .example-top {
-    margin-bottom : 120px;
+    background: #8d8d8d;
+    padding: 6px;
+    display: block;
 }
-
-.example-top a {
-    font-size: 16px; 
-    color: #6d5ad6; 
-    font-weight: bold;
-}
-            
+         
 .examples-list {
     max-width : 640px;
-    margin : 0 auto;
     text-align : left;
     padding : 24px;
     box-sizing: border-box;
@@ -62,18 +87,18 @@ a { text-decoration : none;}
     text-align : left;
     margin : 0px;
     padding : 0px;
+    margin-left: 19px;
 }
 
 .examples-list li {
-    list-style-type: none;
-    padding: 6px;
-    padding-left : 0px;
-    
+    list-style-type: square;
+    padding: 0;
+    padding-left: -1px;
 }
 
 .examples-list li a {
     font-size: 16px;
-    color: #6d5ad6;
+    color: #f9f9f9;
     font-weight: bold;
 }
 
@@ -86,5 +111,12 @@ a { text-decoration : none;}
 .multi-input.selected {
     
     border: 2px solid #000;
+}
+
+.example-wrap-test-6, .example-wrap-test-4 {
+    width : 100%;
+    padding : 40px;
+    margin-top: 162px;
+    
 }
 

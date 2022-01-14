@@ -1,4 +1,4 @@
-# HTML5-Color-Picker
+# KellyC-Color-Picker
 
 
 <img src="https://catface.ru/userfiles/media/udata_1544473330_tnsnqkrg.png" height="180"> <img src="https://catface.ru/userfiles/media/udata_1544473327_qbxojemn.png" height="180">
