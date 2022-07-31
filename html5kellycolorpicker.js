@@ -2,9 +2,9 @@
  * @category  html5 widgets
  * @package   Kelly
  * @author    Rubchuk Vladimir <torrenttvi@gmail.com>
- * @copyright 2015-2020 Rubchuk Vladimir
+ * @copyright 2015-2022 Rubchuk Vladimir
  * @license   GPLv3
- * @version   1.21
+ * @version   1.22
  *
  * Usage example :
  *
@@ -375,7 +375,12 @@ function KellyColorPicker(cfg) {
         // put rendered data
 
         if (this.imageData) {
-            ctx.putImageData(this.imageData, 0, 0);
+            
+            canvasHelper.width = wheelBlockSize;
+            canvasHelper.height = wheelBlockSize;
+            canvasHelperCtx.putImageData(this.imageData, 0, 0); // use helper only, put image data directly to ctx cause render bug if combine with draw image ontop after (ex. in triangle.draw) in modern chrome versions
+            ctx.drawImage(canvasHelper, 0, 0); // draw with save overlaps transparent things , not direct putImageData that rewrite all pixels
+
         } else {
             var hAngle = this.startAngle;
             for (var angle = 0; angle <= 360; angle++) {
